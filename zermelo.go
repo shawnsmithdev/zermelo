@@ -1,8 +1,6 @@
 package zermelo
 
 // Sorts a []uint32 using a Radix sort.  This uses O(n) extra memory
-
-// Does a radix sort in place (but uses O(n) extra memory)
 func SortUint32(r []uint32) {
 	buffer := make([]uint32, len(r))
 	rsortUint32BYOB(r, buffer)
