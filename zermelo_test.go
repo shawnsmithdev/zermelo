@@ -1,4 +1,4 @@
-package ZermeloGo
+package zermelo
 
 import (
 	"testing"
