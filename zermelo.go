@@ -1,4 +1,4 @@
-package ZermeloGo
+package zermelo
 
 // Sorts a []uint32 using a Radix sort.  This uses O(n) extra memory
 
