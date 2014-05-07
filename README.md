@@ -1,4 +1,4 @@
-zermelo
+zermelo [![Build Status](https://travis-ci.org/shawnsmithdev/zermelo.svg)](https://travis-ci.org/shawnsmithdev/zermelo)
 =========
 
 A performance sorting library for Golang.
