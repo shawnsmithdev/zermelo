@@ -44,10 +44,11 @@ Working
 
 TODO
 ----
-[x] Benchmarks
-[ ] Split into files by type
-[ ] Signed ints
-[ ] Floats
-[ ] Sort() call that uses O(1) reflection with sort.Sort() base case
-[ ] Move type specific code to subpackages
+
+* ~~Benchmarks~~ done
+* Split into files by type
+* Signed ints
+* Floats
+* Sort() call that uses O(1) reflection with sort.Sort() base case
+* Move type specific code to subpackages
 
