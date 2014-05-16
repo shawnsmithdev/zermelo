@@ -14,27 +14,28 @@ func foo(large []uint64)
 uint64 Benchmarks
 -----------------
 
+Lower is better
 
-| Size  | Bytes | Kilobytes | Megabytes| sort.Sort() iter/1s | sort.Sort() time | zermelo iter/1s | zermelo time   |
-|-------|-------|-----------|----------|---------------------|------------------|-----------------|----------------|
-| Tiny  |512    |   0.5     |          |              500000 |      3408 ns/op  |          200000 |     8669 ns/op |
-| Small |2048   |   2       |          |              100000 |     22940 ns/op  |          100000 |    22241 ns/op |
-| nil   |524288 |   512     |   0.5    |                 100 |  13497885 ns/op  |            1000 |  2249122 ns/op |
-| Huge  |8388608|   8192    |   8      |                   5 | 269986939 ns/op  |              50 | 41310842 ns/op |
+| Size  | # of keys | sort.Sort() ns/op | zermelo ns/op |
+|-------|-----------|-------------------|---------------|
+| Tiny  |512        |3408               |8669           |
+| Small |2048       |22940              |22241          |
+| nil   |524288     |13497885           |2249122        |
+| Huge  |8388608    |269986939          |41310842       |
 
 Working
 -------
 
 * []uint32
 * []uint64
+* []int32
 
 TODO
 ----
 
 * ~~Benchmarks~~ done
-* Split into files by type
-* Signed ints
+* ~~Split into files by type~~ done
+* Signed ~~int32~~, int64, int
 * Floats
 * Sort() call that uses O(1) reflection with sort.Sort() base case
 * Move type specific code to subpackages
-
