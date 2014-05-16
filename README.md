@@ -14,14 +14,14 @@ func foo(large []uint64)
 uint64 Benchmarks
 -----------------
 
-Lower is better
+Run on a 2013 Macbook Air w/ i7-4650U and 8GB ram.  Lower is better.
 
 | Size  | # of keys | sort.Sort() ns/op | zermelo ns/op |
 |-------|-----------|-------------------|---------------|
-| Tiny  |64         |3408               |8669           |
-| Small |256        |22940              |22241          |
-| nil   |65536      |13497885           |2249122        |
-| Huge  |1048576    |269986939          |41310842       |
+| Tiny  |64         |3606               |3765           |
+| Small |256        |24844              |13976          |
+| nil   |65536      |15509938           |2327765        |
+| Huge  |1048576    |309781344          |50645600       |
 
 Working
 -------
