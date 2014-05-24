@@ -15,7 +15,7 @@ Design Goals
 ------------
 
 Overall these sort implementations will utilize a [radix sort](https://en.wikipedia.org/wiki/Radix_sort "Radix Sort").
-I am especially influenced here by the [these](http://codercorner.com/RadixSortRevisited.htm "Radix Sort Revisited")
+I am especially influenced here by [these](http://codercorner.com/RadixSortRevisited.htm "Radix Sort Revisited")
 [two](http://stereopsis.com/radix.html "Radix Tricks") articles that describe various optimizations and how
 to work around the typical limitations of radix sort.
 
