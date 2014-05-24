@@ -21,13 +21,14 @@ to work around the typical limitations of radix sort.
 
 The code will in general sacrifice DRY'ness for performance and a clean external API.  It is intended for there to be a simple, general Sort() function that applies to all types and sizes, and more advanced options to eek out a bit more performance when you know a lot about the data you are sorting.
 
-Because this is a radix sort, it has a relatively large O(n) overhead costs in both compute time and memory.
-The general Sort() function will also have some O(1) reflection overhead.  You will generally only want to
-use zermelo if you know that your application is not memory constrained, and you will usually be sorting slices
-of supported types with at least 256 elements.  The larger the slices you are sorting, the more benefit you will
-gain by using zermelo instead of the traditionally approach of aliasing the slice type to a Sortable type
-and using sort.Sort().
+Because this is a radix sort, it has a relatively large O(1) overhead costs in compute time, and will
+consume O(n) extra memory for the duration of the sort call. The general Sort() function will also have
+some O(1) reflection overhead.  You will generally only want to use zermelo if you know that your application
+is not memory constrained, and you will usually be sorting slices of supported types with at least 256 elements.
+The larger the slices you are sorting, the more benefit you will gain by using zermelo instead of the
+traditionally approach of aliasing the slice type to a Sortable type and using sort.Sort().
 
+The sort is not adaptive in the traditional sense, but I plan to implement a check to short circuit a lot of the work if it is detected that the slice is already sorted.  Stability is not relevant as zermelo only supports slices of numeric types (except the general Sort() method with sort.Sortable types that are not numeric slices, as those will be sorted by the standard library's comparison sort, which is stable).
 
 uint64 Benchmarks
 -----------------
