@@ -48,13 +48,14 @@ Working
 * []uint32
 * []uint64
 * []int32
+* []int64
 
 TODO
 ----
 
 * ~~Benchmarks~~ done
 * ~~Split into files by type~~ done
-* Signed ~~int32~~, int64, int
+* Signed ~~int32~~, ~~int64~~, int
 * Floats
 * Sort() call that uses O(1) reflection with sort.Sort() base case
 * Move type specific code to subpackages
