@@ -80,6 +80,23 @@ func TestSortInt32(t *testing.T) {
 	}
 }
 
+func TestSortInt64(t *testing.T) {
+	var godata [TEST_SMALL_SIZE]int64
+	g := godata[:]
+	genTestDataInt64(g)
+	var rdata [TEST_SMALL_SIZE]int64
+	r := rdata[:]
+	copy(r, g)
+	sort.Sort(int64Sortable(g))
+	SortInt64(r)
+	for i, val := range g {
+		if r[i] != val {
+			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			t.FailNow()
+		}
+	}
+}
+
 // Benchmarks
 
 func BenchmarkZermeloSortUint64Tiny(b *testing.B) {
@@ -153,11 +170,29 @@ func genTestDataUint64(data []uint64) {
 }
 
 // rand doesn't make generating random singed values easy
-// We generate a random uin64 between 0 and 2^32 - 1
+// We generate random int64 between 0 and 2^32 - 1
 // Then we subtract 2^31
 func genTestDataInt32(data []int32) {
 	rand.Seed(time.Now().UnixNano())
 	for i, _ := range data {
 		data[i] = int32(rand.Int63n(1<<32) - (1 << 31))
+	}
+}
+
+// For int64 instead we'll just roll the sign bit seperately
+// This does results in 0 being twice as likely as any other number
+// but the chances are so very remote that it doesn't matter for tests
+func genTestDataInt64(data []int64) {
+	rand.Seed(time.Now().UnixNano())
+	var tmp int64
+	var isNeg bool
+	for i, _ := range data {
+		tmp = rand.Int63()
+		isNeg = 1 == (1 & rand.Uint32())
+		if isNeg {
+			data[i] = 0 - tmp
+		} else {
+			data[i] = tmp
+		}
 	}
 }

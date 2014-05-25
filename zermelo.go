@@ -40,3 +40,13 @@ func SortInt32(r []int32) {
 		rsortInt32BYOB(r, buffer)
 	}
 }
+
+// Sorts a []int64 using a Radix sort.  This uses O(n) extra memory
+func SortInt64(r []int64) {
+	if len(r) < rSortMinSize {
+		sort.Sort(int64Sortable(r))
+	} else {
+		buffer := make([]int64, len(r))
+		rsortInt64BYOB(r, buffer)
+	}
+}
