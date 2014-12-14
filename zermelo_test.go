@@ -13,6 +13,23 @@ const TEST_SMALL_SIZE = 1 << 8 // * 64bit = 2 KB (break even is around here)
 const TEST_SIZE = 1 << 16      // * 64bit = 512 KB
 const TEST_BIG_SIZE = 1 << 20  // * 64bit = 8 MB
 
+func TestReflectSortUin64(t *testing.T) {
+	var godata [TEST_SIZE]uint64
+	g := godata[:]
+	genTestDataUint64(g)
+	var rdata [TEST_SIZE]uint64
+	r := rdata[:]
+	copy(r, g)
+	SortUint64(uint64Sortable(g))
+	Sort(r)
+	for i, val := range g {
+		if r[i] != val {
+			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			t.FailNow()
+		}
+	}
+}
+
 func TestSortUint32Empty(t *testing.T) {
 	empty := make(uint32Sortable, 0)
 	SortUint32(empty)
@@ -142,7 +159,7 @@ func zermeloSortUint64Bencher(b *testing.B, rnd []uint64, a []uint64) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		copy(a, rnd)
-		SortUint64(a)
+		Sort(a)
 	}
 }
 
