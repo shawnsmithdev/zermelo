@@ -11,9 +11,9 @@ const rSortRadix = 8
 // Slices smaller than this use sort.Sort() instead of radix sort.
 const rSortMinSize = 256
 
-// Sorts x with the library if it is a large enough, supported slice type.
-// Otherwise it tries to sort x using sort.Sort().
-// If it is a supported type and doesn't implement sort.Interface, this does nothing.
+// Attempts to sort x. If x is a supported slice type, this library will be
+// be used to sort it. Otherwise, this attempts to sort x using sort.Sort().
+// If x is not a supported type, and doesn't implement sort.Interface, this does nothing.
 func Sort(x interface{}) {
 	switch xAsCase := x.(type) {
 	case []uint32:
