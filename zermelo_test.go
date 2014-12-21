@@ -8,11 +8,12 @@ import (
 	"time"
 )
 
-const TEST_TINY_SIZE = 1 << 6  // * 64bit = 512 B (worse that sort.Sort)
-const TEST_SMALL_SIZE = 1 << 8 // * 64bit = 2 KB (break even is around here)
-const TEST_SIZE = 1 << 16      // * 64bit = 512 KB
-const TEST_BIG_SIZE = 1 << 20  // * 64bit = 8 MB
+const TEST_TINY_SIZE = 1 << 6  //   64 * 64bit = 512 B (worse that sort.Sort)
+const TEST_SMALL_SIZE = 1 << 8 //  256 * 64bit = 2 KB (break even is around here)
+const TEST_SIZE = 1 << 16      // ~64k * 64bit = 512 KB
+const TEST_BIG_SIZE = 1 << 20  //  ~1M * 64bit = 8 MB 
 
+// Compare results of using reflection api instead of directly calling sort func
 func TestReflectSortUin64(t *testing.T) {
 	var godata [TEST_SIZE]uint64
 	g := godata[:]
@@ -30,6 +31,7 @@ func TestReflectSortUin64(t *testing.T) {
 	}
 }
 
+// Make sure sort functions handle empty slices
 func TestSortUint32Empty(t *testing.T) {
 	empty := make(uint32Sortable, 0)
 	SortUint32(empty)
@@ -46,6 +48,24 @@ func TestSortUint64Empty(t *testing.T) {
 	}
 }
 
+// Test basic sorting
+func TestSortUint(t *testing.T) {
+	var godata [TEST_SIZE]uint
+	g := godata[:]
+	genTestDataUint(g)
+	var rdata [TEST_SIZE]uint
+	r := rdata[:]
+	copy(r, g)
+	sort.Sort(uintSortable(g))
+	Sort(r)
+	for i, val := range g {
+		if r[i] != val {
+			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			t.FailNow()
+		}
+	}
+}
+
 func TestSortUint32(t *testing.T) {
 	var godata [TEST_SIZE]uint32
 	g := godata[:]
@@ -54,7 +74,7 @@ func TestSortUint32(t *testing.T) {
 	r := rdata[:]
 	copy(r, g)
 	sort.Sort(uint32Sortable(g))
-	SortUint32(r)
+	Sort(r)
 	for i, val := range g {
 		if r[i] != val {
 			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
@@ -71,7 +91,24 @@ func TestSortUint64(t *testing.T) {
 	r := rdata[:]
 	copy(r, g)
 	sort.Sort(uint64Sortable(g))
-	SortUint64(r)
+	Sort(r)
+	for i, val := range g {
+		if r[i] != val {
+			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			t.FailNow()
+		}
+	}
+}
+
+func TestSortInt(t *testing.T) {
+	var godata [TEST_SMALL_SIZE]int
+	g := godata[:]
+	genTestDataInt(g)
+	var rdata [TEST_SMALL_SIZE]int
+	r := rdata[:]
+	copy(r, g)
+	sort.Sort(sort.IntSlice(g))
+	Sort(r)
 	for i, val := range g {
 		if r[i] != val {
 			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
@@ -88,7 +125,7 @@ func TestSortInt32(t *testing.T) {
 	r := rdata[:]
 	copy(r, g)
 	sort.Sort(int32Sortable(g))
-	SortInt32(r)
+	Sort(r)
 	for i, val := range g {
 		if r[i] != val {
 			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
@@ -105,7 +142,7 @@ func TestSortInt64(t *testing.T) {
 	r := rdata[:]
 	copy(r, g)
 	sort.Sort(int64Sortable(g))
-	SortInt64(r)
+	Sort(r)
 	for i, val := range g {
 		if r[i] != val {
 			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
@@ -113,6 +150,41 @@ func TestSortInt64(t *testing.T) {
 		}
 	}
 }
+
+func TestSortFloat32(t *testing.T) {
+	var godata [TEST_SMALL_SIZE]float32
+	g := godata[:]
+	genTestDataFloat32(g)
+	var rdata [TEST_SMALL_SIZE]float32
+	r := rdata[:]
+	copy(r, g)
+	sort.Sort(float32Sortable(g))
+	Sort(r)
+	for i, val := range g {
+		if r[i] != val {
+			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			t.FailNow()
+		}
+	}
+}
+
+func TestSortFloat64(t *testing.T) {
+	var godata [TEST_SMALL_SIZE]float64
+	g := godata[:]
+	genTestDataFloat64(g)
+	var rdata [TEST_SMALL_SIZE]float64
+	r := rdata[:]
+	copy(r, g)
+	sort.Sort(sort.Float64Slice(g))
+	Sort(r)
+	for i, val := range g {
+		if r[i] != val {
+			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			t.FailNow()
+		}
+	}
+}
+
 
 // Benchmarks
 
@@ -172,6 +244,13 @@ func goSortUint64Bencher(b *testing.B, rnd []uint64, a []uint64) {
 	}
 }
 
+func genTestDataUint(data []uint) {
+	rand.Seed(time.Now().UnixNano())
+	for i, _ := range data {
+		data[i] = uint(rand.Uint32())
+	}
+}
+
 func genTestDataUint32(data []uint32) {
 	rand.Seed(time.Now().UnixNano())
 	for i, _ := range data {
@@ -189,6 +268,14 @@ func genTestDataUint64(data []uint64) {
 // rand doesn't make generating random singed values easy
 // We generate random int64 between 0 and 2^32 - 1
 // Then we subtract 2^31
+func genTestDataInt(data []int) {
+	rand.Seed(time.Now().UnixNano())
+	for i, _ := range data {
+		data[i] = int(rand.Int63n(1<<32) - (1 << 31))
+	}
+}
+
+// Same process here as with genTestDataInt
 func genTestDataInt32(data []int32) {
 	rand.Seed(time.Now().UnixNano())
 	for i, _ := range data {
@@ -211,5 +298,19 @@ func genTestDataInt64(data []int64) {
 		} else {
 			data[i] = tmp
 		}
+	}
+}
+
+func genTestDataFloat32(data []float32) {
+	rand.Seed(time.Now().UnixNano())
+	for i, _ := range data {
+		data[i] = rand.Float32()
+	}
+}
+
+func genTestDataFloat64(data []float64) {
+	rand.Seed(time.Now().UnixNano())
+	for i, _ := range data {
+		data[i] = rand.Float64()
 	}
 }

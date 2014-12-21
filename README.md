@@ -21,7 +21,7 @@ to work around the typical limitations of radix sort.
 
 The code will in general sacrifice DRY'ness for performance and a clean external API.  There is a general Sort() function that applies to all types and sizes, and more advanced options to avoid reflection when you know the type of the data you are sorting.
 
-Because this is a radix sort, it has a relatively large O(1) overhead costs in compute time, moreso with reflection, and will consume O(n) extra memory for the duration of the sort call. The general Sort() function will also have some O(1) reflection overhead.  You will generally only want to use zermelo if you know that your application is not memory constrained, and you will usually be sorting slices of supported types with at least 256 elements. The larger the slices you are sorting, the more benefit you will gain by using zermelo instead of the traditionally approach of aliasing the slice type to a Sortable type and using sort.Sort().
+Because this is a radix sort, it has a relatively large O(1) overhead costs in compute time, moreso with reflection, and will consume O(n) extra memory for the duration of the sort call. You will generally only want to use zermelo if you know that your application is not memory constrained, and you will usually be sorting slices of supported types with at least 256 elements. The larger the slices you are sorting, the more benefit you will gain by using zermelo instead of the traditionally approach of aliasing the slice type to a Sortable type and using sort.Sort().
 
 The sort is not adaptive in the traditional sense, but I plan to implement a check to short circuit a lot of the work if it is detected that the slice is already sorted.  Stability is not relevant as zermelo only supports slices of numeric types (except the general Sort() method with sort.Sortable types that are not numeric slices, as those will be sorted by the standard library's comparison sort, which is stable).
 
@@ -48,10 +48,8 @@ Working
 TODO
 ----
 
-* ~~Benchmarks~~ done
-* ~~Split into files by type~~ done
-* Signed ~~int32~~, ~~int64~~, int
-* Floats
-* ~~Sort() call that uses O(1) reflection~~ done
-* Use sort.Sort() base case for unsupported Sortable's
+* int[]
+* uint[]
+* float32[]
+* float64[]
 * Move type specific code to subpackages

@@ -16,30 +16,33 @@ const rSortMinSize = 256
 // If x is not a supported type, and doesn't implement sort.Interface, this does nothing.
 func Sort(x interface{}) {
 	switch xAsCase := x.(type) {
+	case []uint:
+		SortUint(xAsCase)
 	case []uint32:
 		SortUint32(xAsCase)
 	case []uint64:
 		SortUint64(xAsCase)
+	case []int:
+		SortInt(xAsCase)
 	case []int32:
 		SortInt32(xAsCase)
 	case []int64:
 		SortInt64(xAsCase)
+	case []float32:
+		SortFloat32(xAsCase)
+	case []float64:
+		SortFloat64(xAsCase)
 	case sort.Interface:
 		sort.Sort(xAsCase)
 	}
 }
 
-// Sorts a []uint64 using a Radix sort.  This uses O(n) extra memory
-func SortUint64(r []uint64) {
-	if len(r) < rSortMinSize {
-		sort.Sort(uint64Sortable(r))
-	} else {
-		buffer := make([]uint64, len(r))
-		rsortUint64BYOB(r, buffer)
-	}
+// Sorts a []uint using a Radix sort.
+func SortUint(r []uint) {
+	sort.Sort(uintSortable(r)) // TODO
 }
 
-// Sorts a []uint32 using a Radix sort.  This uses O(n) extra memory
+// Sorts a []uint32 using a Radix sort.
 func SortUint32(r []uint32) {
 	if len(r) < rSortMinSize {
 		sort.Sort(uint32Sortable(r))
@@ -49,7 +52,22 @@ func SortUint32(r []uint32) {
 	}
 }
 
-// Sorts a []int32 using a Radix sort.  This uses O(n) extra memory
+// Sorts a []uint64 using a Radix sort.
+func SortUint64(r []uint64) {
+	if len(r) < rSortMinSize {
+		sort.Sort(uint64Sortable(r))
+	} else {
+		buffer := make([]uint64, len(r))
+		rsortUint64BYOB(r, buffer)
+	}
+}
+
+// Sorts a []int using a Radix sort.
+func SortInt(r []int) {
+	sort.Sort(sort.IntSlice(r)) // TODO
+}
+
+// Sorts a []int32 using a Radix sort.
 func SortInt32(r []int32) {
 	if len(r) < rSortMinSize {
 		sort.Sort(int32Sortable(r))
@@ -59,7 +77,7 @@ func SortInt32(r []int32) {
 	}
 }
 
-// Sorts a []int64 using a Radix sort.  This uses O(n) extra memory
+// Sorts a []int64 using a Radix sort.
 func SortInt64(r []int64) {
 	if len(r) < rSortMinSize {
 		sort.Sort(int64Sortable(r))
@@ -67,4 +85,14 @@ func SortInt64(r []int64) {
 		buffer := make([]int64, len(r))
 		rsortInt64BYOB(r, buffer)
 	}
+}
+
+// Sorts a []float32 using a Radix sort.
+func SortFloat32(r []float32) {
+	sort.Sort(float32Sortable(r)) // TODO
+}
+
+// Sorts a []float64 using a Radix sort.
+func SortFloat64(r []float64) {
+	sort.Sort(sort.Float64Slice(r)) // TODO
 }
