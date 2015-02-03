@@ -38,7 +38,7 @@ func foo(bar SomeRemoteData)
 
     while bar.hasMore() {
         bar.Read(data)
-        zuint64.Sort(data, buffer)
+        zuint64.SortBYOB(data, buffer)
         doSomething(data)
     }
 }
