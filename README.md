@@ -25,6 +25,25 @@ Because this is a radix sort, it has a relatively large O(1) overhead costs in c
 
 The sort is not adaptive in the traditional sense, but I plan to implement a check to short circuit a lot of the work if it is detected that the slice is already sorted.  Stability is not relevant as zermelo only supports slices of numeric types (except the general Sort() method with sort.Sortable types that are not numeric slices, as those will be sorted by the standard library's comparison sort, which is stable).
 
+Zermelo Subpackages
+-------------------
+Using zermelo.Sort() incurs a small constant overhead for runtime reflection.  It also allocates buffer space, which must eventually be garbage collected. While premature optimization should be avoided, this behavior may be a performance concern in demanding applications. Zermelo provides individual subpackages for each of the supported types, and new packages will be created as new types become supported.
+
+```go
+import "github.com/shawnsmithdev/zermelo/zuint64"
+
+func foo(bar SomeRemoteData)
+    data := make([]uint64, REALLY_BIG)
+    buffer := make([]uint64, REALLY_BIG)
+
+    while bar.hasMore() {
+        bar.Read(data)
+        zuint64.Sort(data, buffer)
+        doSomething(data)
+    }
+}
+```
+
 uint64 Benchmarks
 -----------------
 
