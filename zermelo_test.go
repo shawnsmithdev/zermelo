@@ -1,6 +1,14 @@
 package zermelo
 
 import (
+	"github.com/shawnsmithdev/zermelo/zfloat32"
+	"github.com/shawnsmithdev/zermelo/zfloat64"
+	"github.com/shawnsmithdev/zermelo/zint"
+	"github.com/shawnsmithdev/zermelo/zint32"
+	"github.com/shawnsmithdev/zermelo/zint64"
+	"github.com/shawnsmithdev/zermelo/zuint"
+	"github.com/shawnsmithdev/zermelo/zuint32"
+	"github.com/shawnsmithdev/zermelo/zuint64"
 	"log"
 	"math/rand"
 	"sort"
@@ -14,172 +22,154 @@ const TEST_SIZE = 1 << 16      // ~64k * 64bit = 512 KB
 const TEST_BIG_SIZE = 1 << 20  //  ~1M * 64bit = 8 MB 
 
 // Compare results of using reflection api instead of directly calling sort func
-func TestReflectSortUin64(t *testing.T) {
-	var godata [TEST_SIZE]uint64
-	g := godata[:]
-	genTestDataUint64(g)
-	var rdata [TEST_SIZE]uint64
-	r := rdata[:]
-	copy(r, g)
-	SortUint64(uint64Sortable(g))
-	Sort(r)
-	for i, val := range g {
-		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
-			t.FailNow()
-		}
-	}
-}
 
-// Make sure sort functions handle empty slices
-func TestSortUint32Empty(t *testing.T) {
-	empty := make(uint32Sortable, 0)
-	SortUint32(empty)
-	if len(empty) != 0 {
-		t.FailNow()
-	}
-}
-
-func TestSortUint64Empty(t *testing.T) {
-	empty := make(uint64Sortable, 0)
-	SortUint64(empty)
-	if len(empty) != 0 {
-		t.FailNow()
-	}
-}
-
-// Test basic sorting
-func TestSortUint(t *testing.T) {
-	var godata [TEST_SIZE]uint
-	g := godata[:]
-	genTestDataUint(g)
-	var rdata [TEST_SIZE]uint
-	r := rdata[:]
-	copy(r, g)
-	sort.Sort(uintSortable(g))
-	Sort(r)
-	for i, val := range g {
-		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
-			t.FailNow()
-		}
-	}
-}
-
-func TestSortUint32(t *testing.T) {
-	var godata [TEST_SIZE]uint32
-	g := godata[:]
-	genTestDataUint32(g)
-	var rdata [TEST_SIZE]uint32
-	r := rdata[:]
-	copy(r, g)
-	sort.Sort(uint32Sortable(g))
-	Sort(r)
-	for i, val := range g {
-		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
-			t.FailNow()
-		}
-	}
-}
-
-func TestSortUint64(t *testing.T) {
-	var godata [TEST_SIZE]uint64
-	g := godata[:]
-	genTestDataUint64(g)
-	var rdata [TEST_SIZE]uint64
-	r := rdata[:]
-	copy(r, g)
-	sort.Sort(uint64Sortable(g))
-	Sort(r)
-	for i, val := range g {
-		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
-			t.FailNow()
-		}
-	}
-}
-
-func TestSortInt(t *testing.T) {
-	var godata [TEST_SMALL_SIZE]int
-	g := godata[:]
-	genTestDataInt(g)
-	var rdata [TEST_SMALL_SIZE]int
-	r := rdata[:]
-	copy(r, g)
-	sort.Sort(sort.IntSlice(g))
-	Sort(r)
-	for i, val := range g {
-		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
-			t.FailNow()
-		}
-	}
-}
-
-func TestSortInt32(t *testing.T) {
-	var godata [TEST_SMALL_SIZE]int32
-	g := godata[:]
-	genTestDataInt32(g)
-	var rdata [TEST_SMALL_SIZE]int32
-	r := rdata[:]
-	copy(r, g)
-	sort.Sort(int32Sortable(g))
-	Sort(r)
-	for i, val := range g {
-		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
-			t.FailNow()
-		}
-	}
-}
-
-func TestSortInt64(t *testing.T) {
-	var godata [TEST_SMALL_SIZE]int64
-	g := godata[:]
-	genTestDataInt64(g)
-	var rdata [TEST_SMALL_SIZE]int64
-	r := rdata[:]
-	copy(r, g)
-	sort.Sort(int64Sortable(g))
-	Sort(r)
-	for i, val := range g {
-		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
-			t.FailNow()
-		}
-	}
-}
-
-func TestSortFloat32(t *testing.T) {
-	var godata [TEST_SMALL_SIZE]float32
-	g := godata[:]
+func TestReflectSortFloat32(t *testing.T) {
+	g := make([]float32, TEST_SIZE)
+	r := make([]float32, TEST_SIZE)
 	genTestDataFloat32(g)
-	var rdata [TEST_SMALL_SIZE]float32
-	r := rdata[:]
 	copy(r, g)
-	sort.Sort(float32Sortable(g))
+	zfloat32.Sort(g)
 	Sort(r)
 	for i, val := range g {
 		if r[i] != val {
 			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
 			t.FailNow()
 		}
+		if i > 0 && val < r[i-1] {
+			log.Printf("Not Sorted!")
+			t.FailNow()
+		}
 	}
 }
 
-func TestSortFloat64(t *testing.T) {
-	var godata [TEST_SMALL_SIZE]float64
-	g := godata[:]
+func TestReflectSortFloat64(t *testing.T) {
+	g := make([]float64, TEST_SIZE)
+	r := make([]float64, TEST_SIZE)
 	genTestDataFloat64(g)
-	var rdata [TEST_SMALL_SIZE]float64
-	r := rdata[:]
 	copy(r, g)
-	sort.Sort(sort.Float64Slice(g))
+	zfloat64.Sort(g)
 	Sort(r)
 	for i, val := range g {
 		if r[i] != val {
 			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			t.FailNow()
+		}
+		if i > 0 && val < r[i-1] {
+			log.Printf("Not Sorted!")
+			t.FailNow()
+		}
+	}
+}
+
+func TestReflectSortInt(t *testing.T) {
+	g := make([]int, TEST_SIZE)
+	r := make([]int, TEST_SIZE)
+	genTestDataInt(g)
+	copy(r, g)
+	zint.Sort(g)
+	Sort(r)
+	for i, val := range g {
+		if r[i] != val {
+			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			t.FailNow()
+		}
+		if i > 0 && val < r[i-1] {
+			log.Printf("Not Sorted!")
+			t.FailNow()
+		}
+	}
+}
+
+func TestReflectSortInt32(t *testing.T) {
+	g := make([]int32, TEST_SIZE)
+	r := make([]int32, TEST_SIZE)
+	genTestDataInt32(g)
+	copy(r, g)
+	zint32.Sort(g)
+	Sort(r)
+	for i, val := range g {
+		if r[i] != val {
+			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			t.FailNow()
+		}
+		if i > 0 && val < r[i-1] {
+			log.Printf("Not Sorted!")
+			t.FailNow()
+		}
+	}
+}
+
+func TestReflectSortInt64(t *testing.T) {
+	g := make([]int64, TEST_SIZE)
+	r := make([]int64, TEST_SIZE)
+	genTestDataInt64(g)
+	copy(r, g)
+	zint64.Sort(g)
+	Sort(r)
+	for i, val := range g {
+		if r[i] != val {
+			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			t.FailNow()
+		}
+		if i > 0 && val < r[i-1] {
+			log.Printf("Not Sorted!")
+			t.FailNow()
+		}
+	}
+}
+
+func TestReflectSortUint(t *testing.T) {
+	g := make([]uint, TEST_SIZE)
+	r := make([]uint, TEST_SIZE)
+	genTestDataUint(g)
+	copy(r, g)
+	zuint.Sort(g)
+	Sort(r)
+	for i, val := range g {
+		if r[i] != val {
+			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			t.FailNow()
+		}
+		if i > 0 && val < r[i-1] {
+			log.Printf("Not Sorted!")
+			t.FailNow()
+		}
+	}
+}
+
+func TestReflectSortUint32(t *testing.T) {
+	g := make([]uint32, TEST_SIZE)
+	r := make([]uint32, TEST_SIZE)
+	genTestDataUint32(g)
+	copy(r, g)
+	zuint32.Sort(g)
+	Sort(r)
+	for i, val := range g {
+		if r[i] != val {
+			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			t.FailNow()
+		}
+		if i > 0 && val < r[i-1] {
+			log.Printf("Not Sorted!")
+			t.FailNow()
+		}
+	}
+}
+
+func TestReflectSortUint64(t *testing.T) {
+	g := make([]uint64, TEST_SIZE)
+	r := make([]uint64, TEST_SIZE)
+	genTestDataUint64(g)
+	copy(r, g)
+	zuint64.Sort(g)
+	Sort(r)
+	for i, val := range g {
+		if r[i] != val {
+			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			t.FailNow()
+		}
+		if i > 0 && val < r[i-1] {
+			log.Printf("Not Sorted!")
 			t.FailNow()
 		}
 	}
@@ -314,3 +304,44 @@ func genTestDataFloat64(data []float64) {
 		data[i] = rand.Float64()
 	}
 }
+
+
+
+// Implements sort.Interface for float32[]
+type float32Sortable []float32
+func (r float32Sortable) Len() int           { return len(r) }
+func (r float32Sortable) Less(i, j int) bool { return r[i] < r[j] }
+func (r float32Sortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
+
+// float64[] is provided by sort.Float64Slice
+// int is provided by sort.IntSlice
+
+// Implements sort.Interface for int32[]
+type int32Sortable []int32
+func (r int32Sortable) Len() int           { return len(r) }
+func (r int32Sortable) Less(i, j int) bool { return r[i] < r[j] }
+func (r int32Sortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
+
+// Implements sort.Interface for int64[]
+type int64Sortable []int64
+func (r int64Sortable) Len() int           { return len(r) }
+func (r int64Sortable) Less(i, j int) bool { return r[i] < r[j] }
+func (r int64Sortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
+
+// Implements sort.Interface for uint[]
+type uintSortable []uint
+func (r uintSortable) Len() int           { return len(r) }
+func (r uintSortable) Less(i, j int) bool { return r[i] < r[j] }
+func (r uintSortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
+
+// Implements sort.Interface for uint32[]
+type uint32Sortable []uint32
+func (r uint32Sortable) Len() int           { return len(r) }
+func (r uint32Sortable) Less(i, j int) bool { return r[i] < r[j] }
+func (r uint32Sortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
+
+// Implements sort.Interface for uint64[]
+type uint64Sortable []uint64
+func (r uint64Sortable) Len() int           { return len(r) }
+func (r uint64Sortable) Less(i, j int) bool { return r[i] < r[j] }
+func (r uint64Sortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }

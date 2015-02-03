@@ -1,22 +1,55 @@
-package zermelo
+package zint32
 
-// Does a radix sort in place using supplied buffer space. len(r) must equal len(buffer)
-func rsortInt32BYOB(r []int32, buffer []int32) {
-	sliceCheckInt32(r, buffer)
-	copy(buffer, r)
+import (
+	"sort"
+)
+
+// Calling zint32.Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
+const MinSize = 256
+
+const radix = 8
+
+// Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
+func Sort(x []int32) {
+	if len(x) < MinSize {
+		sort.Sort(int32Sortable(x))
+	} else {
+		buffer := make([]int32, len(x))
+		SortBYOB(x, buffer)
+	}
+}
+
+// Similar to Sort(), but returns a sorted copy of x, leaving x unmodified.
+func SortCopy(x []int32) []int32 {
+	y := make([]int32, len(x))
+	if len(x) < MinSize {
+		copy(x, y)
+		sort.Sort(int32Sortable(y))
+	} else {
+		buffer := make([]int32, len(x))
+		SortBYOB(x, buffer)
+	}
+	return y
+}
+
+// Sorts a []int32 using a Radix sort, using supplied buffer space. Panics if
+// len(x) does not equal len(buffer). Uses radix sort even on small slices.
+func SortBYOB(x, buffer []int32) {
+	checkSlices(x, buffer)
+	copy(buffer, x)
 
 	// Radix is a byte, 4 bytes to a uint32
 	for pass := uint(0); pass < 4; pass++ {
 		if pass%2 == 0 { // swap back and forth between buffers to save allocations
-			rsortPassInt32(r[:], buffer[:], pass)
+			sortPass(x[:], buffer[:], pass)
 		} else {
-			rsortPassInt32(buffer[:], r[:], pass)
+			sortPass(buffer[:], x[:], pass)
 		}
 	}
 }
 
-func rsortPassInt32(from []int32, to []int32, pass uint) {
-	byteOffset := pass * rSortRadix
+func sortPass(from, to []int32, pass uint) {
+	byteOffset := pass * radix
 	byteMask := int32(0xFF << byteOffset)
 	var counts [256]int // Keep track of the number of elements for each kind of byte
 	var offset [256]int // Keep track of where room is made for byte groups in the buffer
@@ -59,8 +92,14 @@ func rsortPassInt32(from []int32, to []int32, pass uint) {
 	}
 }
 
-func sliceCheckInt32(a []int32, b []int32) {
+func checkSlices(a, b []int32) {
 	if a == nil || b == nil || len(a) != len(b) {
 		panic("Slices must be the same size and not nil")
 	}
 }
+
+type int32Sortable []int32
+
+func (r int32Sortable) Len() int           { return len(r) }
+func (r int32Sortable) Less(i, j int) bool { return r[i] < r[j] }
+func (r int32Sortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }

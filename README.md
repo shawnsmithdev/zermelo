@@ -44,12 +44,12 @@ Working
 * []uint64
 * []int32
 * []int64
+* int[]
+* uint[]
+* Move type specific code to subpackages (ex. github.com/shawnsmithdev/zermelo/zint64)
 
 TODO
 ----
 
-* int[]
-* uint[]
 * float32[]
 * float64[]
-* Move type specific code to subpackages
