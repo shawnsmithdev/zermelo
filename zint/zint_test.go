@@ -43,7 +43,7 @@ func TestSortEmpty(t *testing.T) {
 	Sort(test)
 	if len(test) != 0 {
 		log.Printf("Should still be empty\n")
-		t.FailNow()	
+		t.FailNow()
 	}
 }
 

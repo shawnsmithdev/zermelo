@@ -1,8 +1,8 @@
 package zint
 
 import (
-	"sort"
 	"reflect"
+	"sort"
 )
 
 // Calling zint.Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
@@ -43,9 +43,9 @@ func SortBYOB(x, buffer []int) {
 	passCount := uint(reflect.TypeOf(int(0)).Bits() / radix)
 	for pass := uint(0); pass < passCount; pass++ {
 		if pass%2 == 0 { // swap back and forth between buffers to save allocations
-			sortPass(x[:], buffer[:], pass, pass == passCount - 1)
+			sortPass(x[:], buffer[:], pass, pass == passCount-1)
 		} else {
-			sortPass(buffer[:], x[:], pass, pass == passCount - 1)
+			sortPass(buffer[:], x[:], pass, pass == passCount-1)
 		}
 	}
 }

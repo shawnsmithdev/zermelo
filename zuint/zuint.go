@@ -1,8 +1,8 @@
 package zuint
 
 import (
-	"sort"
 	"reflect"
+	"sort"
 )
 
 // Calling zuint.Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
