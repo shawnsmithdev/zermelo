@@ -19,7 +19,7 @@ I am especially influenced here by [these](http://codercorner.com/RadixSortRevis
 [two](http://stereopsis.com/radix.html "Radix Tricks") articles that describe various optimizations and how
 to work around the typical limitations of radix sort.
 
-The code will in general sacrifice DRY'ness for performance and a clean external API.  There is a general Sort() function that applies to all types and sizes, and more advanced options to avoid reflection when you know the type of the data you are sorting.
+The code will in general sacrifice DRY'ness for performance and a clean external API.  There is a general Sort() function that applies to all types and sizes, while more advanced options are available in subpackages to avoid reflection when you know the type of the data you are sorting.
 
 Because this is a radix sort, it has a relatively large O(1) overhead costs in compute time, moreso with reflection, and will consume O(n) extra memory for the duration of the sort call. You will generally only want to use zermelo if you know that your application is not memory constrained, and you will usually be sorting slices of supported types with at least 256 elements. The larger the slices you are sorting, the more benefit you will gain by using zermelo instead of the traditionally approach of aliasing the slice type to a Sortable type and using sort.Sort().
 
@@ -44,31 +44,41 @@ func foo(bar SomeRemoteData)
 }
 ```
 
-uint64 Benchmarks
------------------
+Benchmarks
+==========
 
-Run on a 2013 Macbook Air w/ i7-4650U and 8GB ram. For ns/op, lower is better.
+Benchmarks are not a promise of anything. You'll always want to profile for your use case.
 
-| Size  | # of keys | sort.Sort() ns/op | zermelo ns/op |Improvement|
-|-------|-----------|-------------------|---------------|-----------|
-| Tiny  |64         |4361               |4631           |-6.19%     |
-| Small |256        |28390              |20938          |26.25%     |
-| nil   |65536      |17187801           |2856613        |83.38%     |
-| Huge  |1048576    |343859473          |59408405       |82.72%     |
+Run with go 1.4.1 on a 2013 Macbook Air w/ i7-4650U and 8GB ram. For ns/op, lower is better.
 
-Working
--------
+[]uint64
+--------
 
-* []uint32
-* []uint64
+| slice len | golang ns/op | zermelo ns/op |Improvement|zermelo memory|
+|-----------|--------------|---------------|-----------|--------------|
+|64         |3783          |3617           | 4.39%     |  32  B       |
+|256        |25839         |20707          |19.86%     |   2 KB       |
+|65536      |14931449      |2593829        |82.63%     | 512 KB       |
+|1048576    |298591046     |53842130       |81.97%     |   8 MB       |
+
+[]float64
+---------
+
+| slice len | golang ns/op | zermelo ns/op |Improvement|zermelo memory|
+|-----------|--------------|---------------|-----------|--------------|
+|64         |6555          |6563           |-0.12%     |  32  B       |
+|256        |41307         |24639          |15.96%     |   4 KB       |
+|65536      |22999127      |3152232        |86.29%     |   1 MB       |
+|1048576    |464524162     |58010014       |87.51%     |  16 MB       |
+
+Supported Types
+===============
+
+* []float32
+* []float64
+* []int
 * []int32
 * []int64
-* int[]
-* uint[]
-* Move type specific code to subpackages (ex. github.com/shawnsmithdev/zermelo/zint64)
-
-TODO
-----
-
-* float32[]
-* float64[]
+* []uint
+* []uint32
+* []uint64
