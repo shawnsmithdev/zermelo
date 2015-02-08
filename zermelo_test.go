@@ -175,6 +175,20 @@ func TestReflectSortUint64(t *testing.T) {
 	}
 }
 
+func TestSorterFloat64(t *testing.T) {
+	g := make([]float64, TEST_SIZE)
+	genTestData(g)
+
+	sorter := New()
+	sorter.Sort(g)
+	for i, val := range g {
+		if i > 0 && val < g[i-1] {
+			log.Printf("Not Sorted!")
+			t.FailNow()
+		}
+	}
+}
+
 // Benchmarks
 // []uint64
 func BenchmarkZSortUint64T(b *testing.B) {
