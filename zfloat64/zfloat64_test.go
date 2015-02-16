@@ -9,16 +9,11 @@ import (
 )
 
 func TestSort(t *testing.T) {
-	r := []float64{
-		3.1415, -1000.0, -1.0, 100.5, 0, 999,
-		math.MaxFloat64,
-		math.SmallestNonzeroFloat64,
-		-math.MaxFloat64,
-		-math.SmallestNonzeroFloat64,
-	}
+	r := testData()
+	b1 := make([]uint64, len(r))
+	b2 := make([]uint64, len(r))
 
-	Sort(r)
-
+	SortBYOB(r, b1, b2)
 	if !sort.Float64sAreSorted(r) {
 		log.Printf("Should have sorted slice.\n")
 		log.Printf("Data was %v", r)
@@ -27,14 +22,7 @@ func TestSort(t *testing.T) {
 }
 
 func TestSortCopy(t *testing.T) {
-	x := []float64{
-		3.1415, -1000.0, -1.0, 100.5, 0, 999,
-		math.MaxFloat64,
-		math.SmallestNonzeroFloat64,
-		-math.MaxFloat64,
-		-math.SmallestNonzeroFloat64,
-	}
-
+	x := testData()
 	y := SortCopy(x)
 
 	if !sort.Float64sAreSorted(y) {
@@ -56,16 +44,35 @@ func TestSortEmpty(t *testing.T) {
 		log.Printf("Should have been empty\n")
 		t.FailNow()
 	}
+	b1 := make([]uint64, len(r))
+	b2 := make([]uint64, len(r))
+	SortBYOB(r, b1, b2)
+	if len(r) != 0 {
+		log.Printf("Should have been empty\n")
+		t.FailNow()
+	}
 }
 
 func TestSortRand(t *testing.T) {
 	test := func(r []float64) bool {
-		Sort(r)
+		b1 := make([]uint64, len(r))
+		b2 := make([]uint64, len(r))
+		SortBYOB(r, b1, b2)
 		return sort.Float64sAreSorted(r)
 	}
 	config := quick.Config{MaxCountScale: 100}
 
 	if err := quick.Check(test, &config); err != nil {
 		t.Error(err)
+	}
+}
+
+func testData() []float64 {
+	return []float64{
+		3.1415, -1000.0, -1.0, 100.5, 0, 999,
+		math.MaxFloat64,
+		math.SmallestNonzeroFloat64,
+		-math.MaxFloat64,
+		-math.SmallestNonzeroFloat64,
 	}
 }
