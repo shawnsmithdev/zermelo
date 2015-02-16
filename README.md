@@ -66,6 +66,12 @@ Benchmarks
 
 Benchmarks are not a promise of anything. You'll always want to profile for your use case.
 
+You can run these on your own hardware
+
+```Shell
+go test -v -bench . -benchmem
+```
+
 Run with go 1.4.1 on a 2013 Macbook Air w/ i7-4650U and 8GB ram. For ns/op, lower is better.
 
 []uint64
