@@ -7,15 +7,69 @@ import (
 	"testing/quick"
 )
 
-func TestSort(t *testing.T) {
-	test := [7]uint32{3, 1000, 1, 100, 0, 999, math.MaxInt32}
-	Sort(test[:])
+func TestSortBYOB(t *testing.T) {
+	test := []uint32{3, 1000, 1, 100, 0, 999, math.MaxUint32}
+	b := make([]uint32, len(test))
+	SortBYOB(test, b)
 
-	if !uint32sAreSorted(test[:]) {
+	if !uint32sAreSorted(test) {
 		log.Printf("Should have sorted slice.\n")
 		log.Printf("Data was %v", test)
 		t.FailNow()
 	}
+}
+
+func genTestData(size uint) []uint32 {
+	r := make([]uint32, size)
+	for i := range r {
+		r[i] = uint32(len(r) - i)
+	}
+	return r
+}
+
+func runSortTest(t *testing.T, size uint) {
+	x := genTestData(size)
+	Sort(x)
+	if !uint32sAreSorted(x) {
+		log.Printf("Should have sorted slice with len=%v\n", len(x))
+		t.FailNow()
+	}
+}
+
+func TestSortSmall(t *testing.T) {
+	runSortTest(t, MinSize-1)
+}
+
+func TestSortBig(t *testing.T) {
+	runSortTest(t, MinSize)
+}
+
+func runSortCopyTest(t *testing.T, size uint) {
+	x := genTestData(size)
+	if uint32sAreSorted(x) {
+		log.Printf("Should NOT have sorted data in generated slice.\n")
+		log.Printf("Data was %v", x)
+		t.FailNow()
+	}
+	c := SortCopy(x)
+	if !uint32sAreSorted(c) {
+		log.Printf("Should have sorted copied slice.\n")
+		log.Printf("Data was %v", c)
+		t.FailNow()
+	}
+	if uint32sAreSorted(x) {
+		log.Printf("Should NOT have sorted original slice.\n")
+		log.Printf("Data was %v", x)
+		t.FailNow()
+	}
+}
+
+func TestSortCopySmall(t *testing.T) {
+	runSortCopyTest(t, MinSize-1)
+}
+
+func TestSortCopyBig(t *testing.T) {
+	runSortCopyTest(t, MinSize)
 }
 
 func TestSortRand(t *testing.T) {
@@ -31,13 +85,24 @@ func TestSortRand(t *testing.T) {
 	}
 }
 
-func TestSortEmpty(t *testing.T) {
+func TestEmpty(t *testing.T) {
 	test := []uint32{}
 	Sort(test)
 	if len(test) != 0 {
 		log.Printf("Should still be empty\n")
 		t.FailNow()
 	}
+	x := SortCopy(test)
+	if len(test) != 0 || len(x) != 0 {
+		log.Printf("Should still be empty\n")
+		t.FailNow()
+	}
+	SortBYOB(test, test)
+	if len(test) != 0 {
+		log.Printf("Should still be empty\n")
+		t.FailNow()
+	}
+
 }
 
 func uint32sAreSorted(data []uint32) bool {
@@ -46,8 +111,6 @@ func uint32sAreSorted(data []uint32) bool {
 			continue
 		}
 		if x < data[idx-1] {
-			log.Printf("Value at index %v (%v) was less than at index %v (%v)\n",
-				idx, x, idx-1, data[idx-1])
 			return false
 		}
 	}

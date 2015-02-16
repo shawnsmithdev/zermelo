@@ -22,13 +22,8 @@ func Sort(x []int64) {
 // Similar to Sort(), but returns a sorted copy of x, leaving x unmodified.
 func SortCopy(x []int64) []int64 {
 	y := make([]int64, len(x))
-	if len(x) < MinSize {
-		copy(x, y)
-		sort.Sort(int64Sortable(y))
-	} else {
-		buffer := make([]int64, len(x))
-		SortBYOB(x, buffer)
-	}
+	copy(y, x)
+	Sort(y)
 	return y
 }
 

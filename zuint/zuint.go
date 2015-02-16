@@ -26,13 +26,8 @@ func Sort(x []uint) {
 // Similar to Sort(), but returns a sorted copy of x, leaving x unmodified.
 func SortCopy(x []uint) []uint {
 	y := make([]uint, len(x))
-	if len(x) < MinSize {
-		copy(x, y)
-		sort.Sort(uintSortable(y))
-	} else {
-		buffer := make([]uint, len(x))
-		SortBYOB(x, buffer)
-	}
+	copy(y, x)
+	Sort(y)
 	return y
 }
 
