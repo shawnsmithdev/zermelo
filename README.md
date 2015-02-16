@@ -47,7 +47,7 @@ func foo(bar SomeRemoteData)
 Sorter
 ------
 
-A Sorter will reuse buffers created during Sort() calls.
+A Sorter will reuse buffers created during Sort() calls. This is not thread safe.
 
 ```go
 import "github.com/shawnsmithdev/zermelo"
