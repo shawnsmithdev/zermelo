@@ -44,6 +44,23 @@ func foo(bar SomeRemoteData)
 }
 ```
 
+Sorter
+------
+
+A Sorter will reuse buffers created during Sort() calls.
+
+```go
+import "github.com/shawnsmithdev/zermelo"
+
+func foo(bar [][]uint64) {
+	sorter := zermelo.New()
+	for _, x := range(bar) {
+		sorter.Sort(x)
+	}
+}
+
+```
+
 Benchmarks
 ==========
 
