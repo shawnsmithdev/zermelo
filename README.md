@@ -1,7 +1,7 @@
 zermelo [![Build Status](https://travis-ci.org/shawnsmithdev/zermelo.svg)](https://travis-ci.org/shawnsmithdev/zermelo)  [![GoDoc](https://godoc.org/github.com/shawnsmithdev/zermelo?status.png)](https://godoc.org/github.com/shawnsmithdev/zermelo) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/shawnsmithdev/zermelo/master/LICENSE)
 =========
 
-A performance sorting library for Golang.
+A radix sorting library for Go.  Trade memory for speed!
 
 ```go
 import "github.com/shawnsmithdev/zermelo"
@@ -11,19 +11,19 @@ func foo(large []uint64)
 }
 ```
 
-Design Goals
+About
 ------------
 
-Overall these sort implementations will utilize a [radix sort](https://en.wikipedia.org/wiki/Radix_sort "Radix Sort").
+Zermelo is a sorting library featuring implementations of [radix sort](https://en.wikipedia.org/wiki/Radix_sort "Radix Sort").
 I am especially influenced here by [these](http://codercorner.com/RadixSortRevisited.htm "Radix Sort Revisited")
 [two](http://stereopsis.com/radix.html "Radix Tricks") articles that describe various optimizations and how
 to work around the typical limitations of radix sort.
 
-The code will in general sacrifice DRY'ness for performance and a clean external API.  There is a general Sort() function that applies to all types and sizes, while more advanced options are available in subpackages to avoid reflection when you know the type of the data you are sorting.
+The code in general sacrifices DRY'ness for performance and an easy to use but flexible API.  The general Sort() function works with any supported slice type, while more advanced options are available in subpackages for specific slice types.
 
-Because this is a radix sort, it has a relatively large O(1) overhead costs in compute time, moreso with reflection, and will consume O(n) extra memory for the duration of the sort call. You will generally only want to use zermelo if you know that your application is not memory constrained, and you will usually be sorting slices of supported types with at least 256 elements. The larger the slices you are sorting, the more benefit you will gain by using zermelo instead of the traditionally approach of aliasing the slice type to a Sortable type and using sort.Sort().
+Because this is a radix sort, it has a relatively large O(1) overhead costs in compute time, and will consume O(n) extra memory for the duration of the sort call (Float sorting consumes twice the memory of integer sorting). You will generally only want to use zermelo if your application is not memory constrained, and you will usually be sorting slices of supported types with at least 256 elements. The larger the slices you are sorting, the more benefit you will gain by using zermelo instead of the standard library's in-place comparison sort.
 
-The sort is not adaptive in the traditional sense, but I plan to implement a check to short circuit a lot of the work if it is detected that the slice is already sorted.  Stability is not relevant as zermelo only supports slices of numeric types (except the general Sort() method with sort.Sortable types that are not numeric slices, as those will be sorted by the standard library's comparison sort, which is stable).
+The sort is not adaptive, but I may eventually implement it.  Stability is not relevant as zermelo only supports slices of numeric types (and perhaps eventually strings).
 
 Zermelo Subpackages
 -------------------
