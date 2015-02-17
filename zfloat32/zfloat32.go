@@ -27,28 +27,33 @@ func Sort(x []float32) {
 
 // Similar to Sort(), but returns a sorted copy of x, leaving x unmodified.
 func SortCopy(x []float32) []float32 {
-	y := make([]uint32, len(x))
-	for idx, val := range x {
-		y[idx] = floatFlip(math.Float32bits(val))
-	}
-	zuint32.Sort(y)
-
-	z := make([]float32, len(x))
-	for idx, val := range y {
-		z[idx] = math.Float32frombits(floatFlop(val))
-	}
-	return z
+	y := make([]float32, len(x))
+	copy(y, x)
+	Sort(y)
+	return y
 }
 
 // Sorts x using a Radix sort, using supplied buffer space y and z. Panics if
 // len(x) does not equal len(y) or len(z). Uses radix sort even on small slices..
 func SortBYOB(x []float32, y, z []uint32) {
+	nans := 0
 	for idx, val := range x {
-		y[idx] = floatFlip(math.Float32bits(val))
+		// Don't sort NaNs, just put them up front and skip them
+		if math.IsNaN(float64(val)) {
+			x[idx] = x[nans]
+			x[nans] = val
+			nans++
+		} else {
+			// If there's NaN's we end up using only part of y and z
+			y[idx-nans] = floatFlip(math.Float32bits(val))
+		}
 	}
-	zuint32.SortBYOB(y, z)
-	for idx, val := range y {
-		x[idx] = math.Float32frombits(floatFlop(val))
+	tosort := y[:len(y)-nans]
+	buffer := z[:len(y)-nans]
+	zuint32.SortBYOB(tosort, buffer)
+	for idx, val := range tosort {
+		// Fill in sorted values after NaNs we skipped
+		x[idx+nans] = math.Float32frombits(floatFlop(val))
 	}
 }
 

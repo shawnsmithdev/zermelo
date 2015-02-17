@@ -30,7 +30,7 @@ func TestSortCopy(t *testing.T) {
 		log.Printf("Data was %v", y)
 		t.FailNow()
 	}
-	if x[0] != 3.1415 || x[7] != math.SmallestNonzeroFloat64 {
+	if x[0] != 3.1415 || x[10] != math.SmallestNonzeroFloat64 {
 		log.Printf("Slice should have not have been modified.\n")
 		log.Printf("Data was %v", y)
 		t.FailNow()
@@ -70,6 +70,7 @@ func TestSortRand(t *testing.T) {
 func testData() []float64 {
 	return []float64{
 		3.1415, -1000.0, -1.0, 100.5, 0, 999,
+		math.NaN(), math.Inf(0), math.Inf(-1),
 		math.MaxFloat64,
 		math.SmallestNonzeroFloat64,
 		-math.MaxFloat64,
