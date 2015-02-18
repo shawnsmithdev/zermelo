@@ -14,9 +14,11 @@ import (
 	"sort"
 )
 
-// Attempts to sort x. If x is a supported slice type, this library will be
-// be used to sort it. Otherwise, this attempts to sort x using sort.Sort().
-// If x is not a supported type, and doesn't implement sort.Interface, an error is returned
+// Attempts to sort x.
+//
+// If x is a supported slice type, this library will be used to sort it. Otherwise,
+// if x implements sort.Interface it will passthrough to the sort.Sort() algorithm.
+// Returns an error on unsupported types.
 func Sort(x interface{}) error {
 	switch xAsCase := x.(type) {
 	case []float32:
@@ -43,13 +45,15 @@ func Sort(x interface{}) error {
 	return nil
 }
 
+// A Sorter can sort things like slices. Returns an error on unsupported types.
 type Sorter interface {
-	Sort(x interface{})
+	Sort(x interface{}) error
 }
 
+// A CopySorter can return sorted copies of slices.  Returns an error on unsupported types.
 type CopySorter interface {
 	Sorter
-	CopySort(x interface{}) interface{}
+	CopySort(x interface{}) (interface{}, error)
 }
 
 // Reuseable buffers
@@ -107,7 +111,7 @@ func (z *zSorter) prepBuffers(x interface{}) {
 	}
 }
 
-func (z *zSorter) Sort(x interface{}) {
+func (z *zSorter) Sort(x interface{}) error {
 	z.prepBuffers(x)
 	switch xAsCase := x.(type) {
 	case []float32:
@@ -128,10 +132,62 @@ func (z *zSorter) Sort(x interface{}) {
 		zuint64.SortBYOB(xAsCase, z.bufUint64Alpha)
 	case sort.Interface:
 		sort.Sort(xAsCase)
+	default:
+		return errors.New("type not supported")
+	}
+	return nil
+}
+
+func (z *zSorter) CopySort(x interface{}) (interface{}, error) {
+	y := makeCopy(x)
+	if y == nil {
+		return x, errors.New("type not supported")
+	}
+	err := z.Sort(y)
+	return y, err
+}
+
+func makeCopy(x interface{}) interface{} {
+	switch xAsCase := x.(type) {
+	case []float32:
+		y := make([]float32, len(xAsCase))
+		copy(y, xAsCase)
+		return y
+	case []float64:
+		y := make([]float64, len(xAsCase))
+		copy(y, xAsCase)
+		return y
+	case []int:
+		y := make([]int, len(xAsCase))
+		copy(y, xAsCase)
+		return y
+	case []int32:
+		y := make([]int32, len(xAsCase))
+		copy(y, xAsCase)
+		return y
+	case []int64:
+		y := make([]int64, len(xAsCase))
+		copy(y, xAsCase)
+		return y
+	case []uint:
+		y := make([]uint, len(xAsCase))
+		copy(y, xAsCase)
+		return y
+	case []uint32:
+		y := make([]uint32, len(xAsCase))
+		copy(y, xAsCase)
+		return y
+	case []uint64:
+		y := make([]uint64, len(xAsCase))
+		copy(y, xAsCase)
+		return y
+	default:
+		return nil
 	}
 }
 
-// A Sorter that reuses buffers on repeated Sort() calls on the same type. Not thread safe.
-func New() Sorter {
+// A CopySorter that reuses buffers on repeated Sort() or CopySort() calls on the same type.
+// This is not thread safe. CopySort() does not support passthrough of sort.Interface values.
+func New() CopySorter {
 	return new(zSorter)
 }

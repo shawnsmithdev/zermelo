@@ -421,6 +421,7 @@ func newGoSorter(x interface{}) sorter {
 	}
 }
 
+
 // Only Float64 and int are directly sortable by the sort package.
 // So these implement sort.Interface for everything else
 type float32Sortable []float32

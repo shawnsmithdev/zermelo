@@ -1,3 +1,4 @@
+// Radix sort for []uint64.
 package zuint64
 
 import (
@@ -8,6 +9,7 @@ import (
 const MinSize = 256
 
 const radix = 8
+const bitSize = 64
 
 // Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []uint64) {
@@ -28,30 +30,31 @@ func SortCopy(x []uint64) []uint64 {
 }
 
 // Sorts x using a Radix sort, using supplied buffer space. Panics if
-// len(x) does not equal len(buffer). Uses radix sort even on small slices..
+// len(x) is greater than len(buffer). Uses radix sort even on small slices.
 func SortBYOB(x, buffer []uint64) {
-	checkSlices(x, buffer)
-	copy(buffer, x)
+	if x == nil || buffer == nil {
+		panic("Slices must not be nil")
+	} else if len(x) > len(buffer) {
+		panic("Buffer too small")
+	}
 
-	// Radix is a byte, 8 bytes to a uint64
-	for pass := uint(0); pass < 8; pass++ {
-		if pass%2 == 0 { // swap back and forth between buffers to save allocations
-			sortPass(x[:], buffer[:], pass)
-		} else {
-			sortPass(buffer[:], x[:], pass)
-		}
+	// Each pass processes a byte offset, copying back and forth between slices
+	from := x
+	to := buffer[:len(x)]
+	for byteOffset := uint(0); byteOffset < bitSize; byteOffset += radix {
+		from, to = sortPass(from, to, byteOffset)
 	}
 }
 
-func sortPass(from, to []uint64, pass uint) {
-	byteOffset := pass * radix
+// Does a pass of radix sort, copying data between the slices
+func sortPass(from, to []uint64, byteOffset uint) (newfrom, newto []uint64) {
 	byteMask := uint64(0xFF << byteOffset)
 	var counts [256]int // Keep track of the number of elements for each kind of byte
 	var offset [256]int // Keep track of where room is made for byte groups in the buffer
 	var passByte uint8  // Current byte value
 
 	for _, elem := range from {
-		// For each elem to sort, fetch the byte at current radix
+		// For each value to sort, fetch the byte at current radix
 		passByte = uint8((elem & byteMask) >> byteOffset)
 		// inc count of bytes of this type
 		counts[passByte]++
@@ -69,14 +72,11 @@ func sortPass(from, to []uint64, pass uint) {
 		to[offset[passByte]] = elem                       // Copy the element depending on byte offsets
 		offset[passByte]++                                // One less space, move the offset
 	}
+	// Next pass copy data the other way
+	return to, from
 }
 
-func checkSlices(a, b []uint64) {
-	if a == nil || b == nil || len(a) != len(b) {
-		panic("Slices must be the same size and not nil")
-	}
-}
-
+// Implements sort.Interface for small slices
 type uint64Sortable []uint64
 
 func (r uint64Sortable) Len() int           { return len(r) }

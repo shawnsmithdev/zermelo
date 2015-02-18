@@ -1,3 +1,5 @@
+// Radix sort for []float64.
+//
 // zfloat64 sorts []float64 by copying the data to new uint64 backed buffers, before sorting them
 // with zuint64, and copying the sorted floats back. This means this allocates twice the additional
 // memory that integer based sorts in zermelo like zuint64 usually do.

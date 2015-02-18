@@ -1,3 +1,5 @@
+// Radix sort for []float32.
+//
 // zfloat32 sorts a []float32 by copying the data to new uint32 backed buffers, before sorting them
 // with zuint32, and copying the sorted floats back. This means this allocates twice the additional
 // memory that integer based sorts in zermelo like zuint32 usually do.

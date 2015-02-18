@@ -1,3 +1,6 @@
+// Radix sort for []int.
+//
+// This package uses runtime reflection to find if int is really int32 or int64.
 package zint
 
 import (
@@ -32,7 +35,6 @@ func SortCopy(x []int) []int {
 // len(x) does not equal len(buffer). Uses radix sort even on small slices.
 func SortBYOB(x, buffer []int) {
 	checkSlices(x, buffer)
-	copy(buffer, x)
 
 	// Reflection because we don't know if int is 32 or 64 bits.
 	passCount := uint(reflect.TypeOf(int(0)).Bits() / radix)

@@ -1,3 +1,4 @@
+// Radix sort for []int64.
 package zint64
 
 import (
@@ -31,7 +32,6 @@ func SortCopy(x []int64) []int64 {
 // len(x) does not equal len(buffer). Uses radix sort even on small slices.
 func SortBYOB(x, buffer []int64) {
 	checkSlices(x, buffer)
-	copy(buffer, x)
 
 	// Radix is a byte, 8 bytes to a uint64
 	for pass := uint(0); pass < 8; pass++ {
