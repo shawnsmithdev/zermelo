@@ -242,6 +242,14 @@ func BenchmarkGoSortFloat64B(b *testing.B) {
 	goSortBencher(b, make([]float64, TEST_BIG_SIZE), make([]float64, TEST_BIG_SIZE))
 }
 
+
+func BenchmarkZSortSorted(b *testing.B) {
+	zermeloSortSortedBencher(b, make([]uint64, TEST_BIG_SIZE), make([]uint64, TEST_BIG_SIZE))
+}
+func BenchmarkGoSortSorted(b *testing.B) {
+	goSortSortedBencher(b, make([]uint64, TEST_BIG_SIZE), make([]uint64, TEST_BIG_SIZE))
+}
+
 // Benchmarking Utility Functions
 
 // these benchmark a type, storing the random values in rnd, copying them to x, and sorting x
@@ -261,6 +269,43 @@ func goSortBencher(b *testing.B, rnd interface{}, x interface{}) {
 	for i := 0; i < b.N; i++ {
 		sliceCopy(x, rnd)
 		gsort(x)
+	}
+}
+
+func zermeloSortSortedBencher(b *testing.B, rnd []uint64, x []uint64) {
+	genSortedTestData(rnd)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		sliceCopy(x, rnd)
+		Sort(x)
+	}
+}
+
+func goSortSortedBencher(b *testing.B, rnd []uint64, x []uint64) {
+	genSortedTestData(rnd)
+	b.ResetTimer()
+	gsort := newGoSorter(rnd)
+	for i := 0; i < b.N; i++ {
+		sliceCopy(x, rnd)
+		gsort(x)
+	}
+}
+
+func genSortedTestData(x interface{}) {
+	switch xAsCase := x.(type) {
+	case []uint64:
+		for idx := range(xAsCase) {
+			xAsCase[idx] = uint64(idx)
+		}
+	}
+}
+
+func genReversedTestData(x interface{}) {
+	switch xAsCase := x.(type) {
+	case []uint64:
+		for idx := range(xAsCase) {
+			xAsCase[idx] = uint64(len(xAsCase)) - uint64(idx)
+		}
 	}
 }
 

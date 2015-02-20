@@ -8,8 +8,9 @@ import (
 // Calling zuint64.Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
 const MinSize = 256
 
-const radix = 8
-const bitSize = 64
+const radix uint = 8
+const radixShift uint = 3
+const bitSize uint = 64
 
 // Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []uint64) {
@@ -41,39 +42,39 @@ func SortBYOB(x, buffer []uint64) {
 	// Each pass processes a byte offset, copying back and forth between slices
 	from := x
 	to := buffer[:len(x)]
+	var passByte uint8
+	var prevVal uint64
 	for byteOffset := uint(0); byteOffset < bitSize; byteOffset += radix {
-		from, to = sortPass(from, to, byteOffset)
-	}
-}
+		byteMask := uint64(0xFF << byteOffset)          // Current 'digit' to look at
+		var counts [256]int                             // Keep track of the number of elements for each kind of byte
+		var offset [256]int                             // Keep track of where room is made for byte groups in the buffer
+		sorted := (byteOffset>>radixShift)&uint(1) == 0 // Check for sorted every other pass
+		prevVal = 0                                     // if elem is always >= prevVal it is already sorted
+		for _, elem := range from {
+			passByte = uint8((elem & byteMask) >> byteOffset) // fetch the byte at current 'digit'
+			counts[passByte]++                                // count of elems to put in this digit's bucket
+			if sorted {                                       // Detect sorted
+				sorted = elem >= prevVal
+				prevVal = elem
+			}
+		}
+		if sorted {
+			return
+		}
+		// Find target bucket offsets
+		for i := 1; i < len(offset); i++ {
+			offset[i] = offset[i-1] + counts[i-1]
+		}
 
-// Does a pass of radix sort, copying data between the slices
-func sortPass(from, to []uint64, byteOffset uint) (newfrom, newto []uint64) {
-	byteMask := uint64(0xFF << byteOffset)
-	var counts [256]int // Keep track of the number of elements for each kind of byte
-	var offset [256]int // Keep track of where room is made for byte groups in the buffer
-	var passByte uint8  // Current byte value
-
-	for _, elem := range from {
-		// For each value to sort, fetch the byte at current radix
-		passByte = uint8((elem & byteMask) >> byteOffset)
-		// inc count of bytes of this type
-		counts[passByte]++
+		// Rebucket while copying to other buffer
+		for _, elem := range from {
+			passByte = uint8((elem & byteMask) >> byteOffset) // Get the digit
+			to[offset[passByte]] = elem                       // Copy the element to the digit's bucket
+			offset[passByte]++                                // One less space, move the offset
+		}
+		// On next pass copy data the other way
+		to, from = from, to
 	}
-
-	// Make room for each group of bytes by calculating offset of each
-	offset[0] = 0
-	for i := 1; i < len(offset); i++ {
-		offset[i] = offset[i-1] + counts[i-1]
-	}
-
-	// Swap values between the buffers by radix
-	for _, elem := range from {
-		passByte = uint8((elem & byteMask) >> byteOffset) // Get the byte of each element at the radix
-		to[offset[passByte]] = elem                       // Copy the element depending on byte offsets
-		offset[passByte]++                                // One less space, move the offset
-	}
-	// Next pass copy data the other way
-	return to, from
 }
 
 // Implements sort.Interface for small slices
