@@ -189,112 +189,12 @@ func TestSorterFloat64(t *testing.T) {
 	}
 }
 
-// Benchmarks
-// []uint64
-func BenchmarkZSortUint64T(b *testing.B) {
-	zermeloSortBencher(b, make([]uint64, TEST_TINY_SIZE), make([]uint64, TEST_TINY_SIZE))
-}
-func BenchmarkGoSortUint64T(b *testing.B) {
-	goSortBencher(b, make([]uint64, TEST_TINY_SIZE), make([]uint64, TEST_TINY_SIZE))
-}
-func BenchmarkZSortUint64S(b *testing.B) {
-	zermeloSortBencher(b, make([]uint64, TEST_SMALL_SIZE), make([]uint64, TEST_SMALL_SIZE))
-}
-func BenchmarkGoSortUint64S(b *testing.B) {
-	goSortBencher(b, make([]uint64, TEST_SMALL_SIZE), make([]uint64, TEST_SMALL_SIZE))
-}
-func BenchmarkZSortUint64(b *testing.B) {
-	zermeloSortBencher(b, make([]uint64, TEST_SIZE), make([]uint64, TEST_SIZE))
-}
-func BenchmarkGoSortUint64(b *testing.B) {
-	goSortBencher(b, make([]uint64, TEST_SIZE), make([]uint64, TEST_SIZE))
-}
-func BenchmarkZSortUint64B(b *testing.B) {
-	zermeloSortBencher(b, make([]uint64, TEST_BIG_SIZE), make([]uint64, TEST_BIG_SIZE))
-}
-func BenchmarkGoSortUint64B(b *testing.B) {
-	goSortBencher(b, make([]uint64, TEST_BIG_SIZE), make([]uint64, TEST_BIG_SIZE))
-}
-
-// []float64
-func BenchmarkZSortFloat64T(b *testing.B) {
-	zermeloSortBencher(b, make([]float64, TEST_TINY_SIZE), make([]float64, TEST_TINY_SIZE))
-}
-func BenchmarkGoSortFloat64T(b *testing.B) {
-	goSortBencher(b, make([]float64, TEST_TINY_SIZE), make([]float64, TEST_TINY_SIZE))
-}
-func BenchmarkZSortFloat64S(b *testing.B) {
-	zermeloSortBencher(b, make([]float64, TEST_SMALL_SIZE), make([]float64, TEST_SMALL_SIZE))
-}
-func BenchmarkGoSortFloat64S(b *testing.B) {
-	goSortBencher(b, make([]float64, TEST_SMALL_SIZE), make([]float64, TEST_SMALL_SIZE))
-}
-func BenchmarkZSortFloat64(b *testing.B) {
-	zermeloSortBencher(b, make([]float64, TEST_SIZE), make([]float64, TEST_SIZE))
-}
-func BenchmarkGoSortFloat64(b *testing.B) {
-	goSortBencher(b, make([]float64, TEST_SIZE), make([]float64, TEST_SIZE))
-}
-func BenchmarkZSortFloat64B(b *testing.B) {
-	zermeloSortBencher(b, make([]float64, TEST_BIG_SIZE), make([]float64, TEST_BIG_SIZE))
-}
-func BenchmarkGoSortFloat64B(b *testing.B) {
-	goSortBencher(b, make([]float64, TEST_BIG_SIZE), make([]float64, TEST_BIG_SIZE))
-}
-
-
-func BenchmarkZSortSorted(b *testing.B) {
-	zermeloSortSortedBencher(b, make([]uint64, TEST_BIG_SIZE), make([]uint64, TEST_BIG_SIZE))
-}
-func BenchmarkGoSortSorted(b *testing.B) {
-	goSortSortedBencher(b, make([]uint64, TEST_BIG_SIZE), make([]uint64, TEST_BIG_SIZE))
-}
-
-// Benchmarking Utility Functions
-
-// these benchmark a type, storing the random values in rnd, copying them to x, and sorting x
-func zermeloSortBencher(b *testing.B, rnd interface{}, x interface{}) {
-	genTestData(rnd)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		sliceCopy(x, rnd)
-		Sort(x)
-	}
-}
-
-func goSortBencher(b *testing.B, rnd interface{}, x interface{}) {
-	genTestData(rnd)
-	b.ResetTimer()
-	gsort := newGoSorter(rnd)
-	for i := 0; i < b.N; i++ {
-		sliceCopy(x, rnd)
-		gsort(x)
-	}
-}
-
-func zermeloSortSortedBencher(b *testing.B, rnd []uint64, x []uint64) {
-	genSortedTestData(rnd)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		sliceCopy(x, rnd)
-		Sort(x)
-	}
-}
-
-func goSortSortedBencher(b *testing.B, rnd []uint64, x []uint64) {
-	genSortedTestData(rnd)
-	b.ResetTimer()
-	gsort := newGoSorter(rnd)
-	for i := 0; i < b.N; i++ {
-		sliceCopy(x, rnd)
-		gsort(x)
-	}
-}
+// Test data generators
 
 func genSortedTestData(x interface{}) {
 	switch xAsCase := x.(type) {
 	case []uint64:
-		for idx := range(xAsCase) {
+		for idx := range xAsCase {
 			xAsCase[idx] = uint64(idx)
 		}
 	}
@@ -303,7 +203,7 @@ func genSortedTestData(x interface{}) {
 func genReversedTestData(x interface{}) {
 	switch xAsCase := x.(type) {
 	case []uint64:
-		for idx := range(xAsCase) {
+		for idx := range xAsCase {
 			xAsCase[idx] = uint64(len(xAsCase)) - uint64(idx)
 		}
 	}
@@ -465,7 +365,6 @@ func newGoSorter(x interface{}) sorter {
 		panic("not supported")
 	}
 }
-
 
 // Only Float64 and int are directly sortable by the sort package.
 // So these implement sort.Interface for everything else

@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 )
+
 // These test makes sure that the MinSize before using sort.Sort() is large enough.
 
 const breakEvenStartSize = 4
-
 
 func TestBreakEvenFloat32(t *testing.T) {
 	size := breakEvenTest(
@@ -85,10 +85,10 @@ func TestBreakEvenUint64Reversed(t *testing.T) {
 		make([]uint64, zuint64.MinSize),
 		zuint64.MinSize,
 		t, genReversedTestData)
-		log.Printf("Zermelo won []uint64 reversed race at length %v\n", size)
+	log.Printf("Zermelo won []uint64 reversed race at length %v\n", size)
 }
 
-func breakEvenTest(g, r interface{}, minSize uint, t *testing.T, genFunc func(interface{})) uint{
+func breakEvenTest(g, r interface{}, minSize uint, t *testing.T, genFunc func(interface{})) uint {
 	gsort := newGoSorter(g)
 	zsort := New()
 	for size := uint(breakEvenStartSize); size < minSize; size++ {
@@ -106,7 +106,7 @@ func breakEvenTest(g, r interface{}, minSize uint, t *testing.T, genFunc func(in
 			gsort(x)
 			gtime := time.Now().UnixNano() - start
 			if ztime > gtime && retry > 0 { // Always throw away first run
-				break;
+				break
 			}
 		}
 		if retry == max {
@@ -116,7 +116,6 @@ func breakEvenTest(g, r interface{}, minSize uint, t *testing.T, genFunc func(in
 	t.FailNow()
 	return 0
 }
-
 
 // Slices x to x[:newlen]
 func sliceSlice(x interface{}, newlen uint) interface{} {

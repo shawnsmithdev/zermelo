@@ -48,11 +48,6 @@ func Sort(x interface{}) error {
 // A Sorter can sort things like slices. Returns an error on unsupported types.
 type Sorter interface {
 	Sort(x interface{}) error
-}
-
-// A CopySorter can return sorted copies of slices.  Returns an error on unsupported types.
-type CopySorter interface {
-	Sorter
 	CopySort(x interface{}) (interface{}, error)
 }
 
@@ -186,8 +181,8 @@ func makeCopy(x interface{}) interface{} {
 	}
 }
 
-// A CopySorter that reuses buffers on repeated Sort() or CopySort() calls on the same type.
+// Creates a Sorter that reuses buffers on repeated Sort() or CopySort() calls on the same type.
 // This is not thread safe. CopySort() does not support passthrough of sort.Interface values.
-func New() CopySorter {
+func New() Sorter {
 	return new(zSorter)
 }
