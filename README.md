@@ -14,20 +14,15 @@ func foo(large []uint64)
 About
 ------------
 
-Zermelo is a sorting library featuring implementations of [radix sort](https://en.wikipedia.org/wiki/Radix_sort "Radix Sort").
-I am especially influenced here by [these](http://codercorner.com/RadixSortRevisited.htm "Radix Sort Revisited")
-[two](http://stereopsis.com/radix.html "Radix Tricks") articles that describe various optimizations and how
-to work around the typical limitations of radix sort.
+Zermelo is a sorting library featuring implementations of [radix sort](https://en.wikipedia.org/wiki/Radix_sort "Radix Sort"). I am especially influenced here by [these](http://codercorner.com/RadixSortRevisited.htm "Radix Sort Revisited") [two](http://stereopsis.com/radix.html "Radix Tricks") articles that describe various optimizations and how to work around the typical limitations of radix sort.
 
-The code in general sacrifices DRY'ness for performance and an easy to use but flexible API.  The general Sort() function works with any supported slice type, while more advanced options are available in subpackages for specific slice types.
+The code in general sacrifices DRY'ness for performance and an easy to use but flexible API. The general `Sort()` function works with any supported slice type, while more advanced options are available in subpackages for specific slice types.
 
-Because this is a radix sort, it has a relatively large O(1) overhead costs in compute time, and will consume O(n) extra memory for the duration of the sort call (Float sorting consumes twice the memory of integer sorting). You will generally only want to use zermelo if your application is not memory constrained, and you will usually be sorting slices of supported types with at least 256 elements. The larger the slices you are sorting, the more benefit you will gain by using zermelo instead of the standard library's in-place comparison sort.
-
-The sort is not adaptive, but I may eventually implement it.  Stability is not relevant as zermelo only supports slices of numeric types (and perhaps eventually strings).
+Because this is a radix sort, it has a relatively large O(1) overhead costs in compute time, and will consume O(n) extra memory for the duration of the sort call. You will generally only want to use zermelo if your application is not memory constrained, and you will usually be sorting slices of supported types with at least 256 elements (128 for 32-bit types). The larger the slices you are sorting, the more benefit you will gain by using zermelo instead of the standard library's in-place comparison sort. The algorithm is also slightly adaptive; at certain times in the algorithm if the whole slice is found to be already sorted, no more work will be done. This is not as good as truely adaptive algorithms but will speed things up in certain cases.
 
 Zermelo Subpackages
 -------------------
-Using zermelo.Sort() incurs a small constant overhead for runtime reflection.  It also allocates buffer space, which must eventually be garbage collected. While premature optimization should be avoided, this behavior may be a performance concern in demanding applications. Zermelo provides individual subpackages for each of the supported types, and new packages will be created as new types become supported.
+Using `zermelo.Sort()` allocates buffer space equal in size to the slice you are sorting, which must eventually be garbage collected. It also incurs a (very small) constant overhead for runtime reflection. While premature optimization should be avoided, this behavior may be a performance concern in demanding applications. Zermelo provides individual subpackages for each of the supported types, and new packages will be created as new types become supported. Subpackages have a `SortBYOB()` method where you can Bring Your Own Buffer (BYOB). Providing a buffer that is smaller than the slice you are sorting will cause a runtime panic. The subpackages `zuint` and `zint` must still use reflection as the bit width (32/64) is only available at runtime.
 
 ```go
 import "github.com/shawnsmithdev/zermelo/zuint64"
@@ -47,16 +42,16 @@ func foo(bar SomeRemoteData)
 Sorter
 ------
 
-A Sorter will reuse buffers created during Sort() calls. This is not thread safe.
+A Sorter will reuse buffers created during `Sort()` calls. This is not thread safe. Buffers are grown as needed at a 25% exponential growth rate.  This means if you sort a slice of size `n`, subsequent calls with slices up to `n * 1.25` in length will not cause another buffer allocation.
 
 ```go
 import "github.com/shawnsmithdev/zermelo"
 
 func foo(bar [][]uint64) {
-	sorter := zermelo.New()
-	for _, x := range(bar) {
-		sorter.Sort(x)
-	}
+    sorter := zermelo.New()
+    for _, x := range(bar) {
+        sorter.Sort(x)
+    }
 }
 
 ```
