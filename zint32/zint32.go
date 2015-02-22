@@ -6,7 +6,7 @@ import (
 )
 
 // Calling zint32.Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
-const MinSize = 256
+const MinSize = 128
 
 const radix = 8
 

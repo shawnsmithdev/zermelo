@@ -9,10 +9,7 @@ import (
 
 func TestSort(t *testing.T) {
 	r := testData()
-	b1 := make([]uint32, len(r))
-	b2 := make([]uint32, len(r))
-
-	SortBYOB(r, b1, b2)
+	SortBYOB(r, make([]float32, len(r)))
 	if !isSorted(r) {
 		log.Printf("Should have sorted slice.\n")
 		log.Printf("Data was %v", r)
@@ -43,20 +40,18 @@ func TestSortEmpty(t *testing.T) {
 		log.Printf("Should have been empty\n")
 		t.FailNow()
 	}
-	b1 := make([]uint32, len(r))
-	b2 := make([]uint32, len(r))
-	SortBYOB(r, b1, b2)
+	SortBYOB(r, make([]float32, len(r)))
 	if len(r) != 0 {
 		log.Printf("Should have been empty\n")
 		t.FailNow()
 	}
+	Sort(nil)
+	SortBYOB(nil, nil)
 }
 
 func TestSortRand(t *testing.T) {
 	test := func(r []float32) bool {
-		b1 := make([]uint32, len(r))
-		b2 := make([]uint32, len(r))
-		SortBYOB(r, b1, b2)
+		SortBYOB(r, make([]float32, len(r)))
 		return isSorted(r)
 	}
 	config := quick.Config{MaxCountScale: 100}

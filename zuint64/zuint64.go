@@ -33,32 +33,36 @@ func SortCopy(x []uint64) []uint64 {
 // Sorts x using a Radix sort, using supplied buffer space. Panics if
 // len(x) is greater than len(buffer). Uses radix sort even on small slices.
 func SortBYOB(x, buffer []uint64) {
-	if x == nil || buffer == nil {
-		panic("Slices must not be nil")
-	} else if len(x) > len(buffer) {
+	if len(x) > len(buffer) {
 		panic("Buffer too small")
+	}
+	if len(x) < 2 {
+		return
 	}
 
 	// Each pass processes a byte offset, copying back and forth between slices
 	from := x
 	to := buffer[:len(x)]
-	var passByte uint8
-	var prevVal uint64
-	for byteOffset := uint(0); byteOffset < bitSize; byteOffset += radix {
-		byteMask := uint64(0xFF << byteOffset)          // Current 'digit' to look at
-		var counts [256]int                             // Keep track of the number of elements for each kind of byte
-		var offset [256]int                             // Keep track of where room is made for byte groups in the buffer
-		sorted := (byteOffset>>radixShift)&uint(1) == 0 // Check for sorted every other pass
-		prevVal = 0                                     // if elem is always >= prevVal it is already sorted
+	var key uint8
+	var prev uint64
+	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
+		keyMask := uint64(0xFF << keyOffset) // Current 'digit' to look at
+		var counts [256]int                  // Keep track of the number of elements for each kind of byte
+		var offset [256]int                  // Keep track of where room is made for byte groups in the buffer
+		sorted := true                       // Check for already sorted
+		prev = 0                             // if elem is always >= prev it is already sorted
 		for _, elem := range from {
-			passByte = uint8((elem & byteMask) >> byteOffset) // fetch the byte at current 'digit'
-			counts[passByte]++                                // count of elems to put in this digit's bucket
-			if sorted {                                       // Detect sorted
-				sorted = elem >= prevVal
-				prevVal = elem
+			key = uint8((elem & keyMask) >> keyOffset) // fetch the byte at current 'digit'
+			counts[key]++                              // count of elems to put in this digit's bucket
+			if sorted {                                // Detect sorted
+				sorted = elem >= prev
+				prev = elem
 			}
 		}
 		if sorted {
+			if (keyOffset>>radixShift)&uint(1) == 1 {
+				copy(to, from)
+			}
 			return
 		}
 		// Find target bucket offsets
@@ -68,9 +72,9 @@ func SortBYOB(x, buffer []uint64) {
 
 		// Rebucket while copying to other buffer
 		for _, elem := range from {
-			passByte = uint8((elem & byteMask) >> byteOffset) // Get the digit
-			to[offset[passByte]] = elem                       // Copy the element to the digit's bucket
-			offset[passByte]++                                // One less space, move the offset
+			key = uint8((elem & keyMask) >> keyOffset) // Get the digit
+			to[offset[key]] = elem                     // Copy the element to the digit's bucket
+			offset[key]++                              // One less space, move the offset
 		}
 		// On next pass copy data the other way
 		to, from = from, to

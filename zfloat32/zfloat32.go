@@ -1,29 +1,24 @@
 // Radix sort for []float32.
-//
-// zfloat32 sorts a []float32 by copying the data to new uint32 backed buffers, before sorting them
-// with zuint32, and copying the sorted floats back. This means this allocates twice the additional
-// memory that integer based sorts in zermelo like zuint32 usually do.
-//
-// However, if memory is available, this is much faster than sort.Sort() for large slices.
 package zfloat32
 
 import (
-	"github.com/shawnsmithdev/zermelo/zuint32"
 	"math"
 	"sort"
 )
 
-// Calling zfloat64.Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
-const MinSize = 256
+// Calling Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
+const MinSize = 128
 
-const radix = 8
+const radix uint = 8
+const radixShift uint = 3
+const bitSize uint = 64
 
 // Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []float32) {
 	if len(x) < MinSize {
 		sort.Sort(float32Sortable(x))
 	} else {
-		SortBYOB(x, make([]uint32, len(x)), make([]uint32, len(x)))
+		SortBYOB(x, make([]float32, len(x)))
 	}
 }
 
@@ -35,9 +30,16 @@ func SortCopy(x []float32) []float32 {
 	return y
 }
 
-// Sorts x using a Radix sort, using supplied buffer space y and z. Panics if
-// len(x) does not equal len(y) or len(z). Uses radix sort even on small slices..
-func SortBYOB(x []float32, y, z []uint32) {
+// Sorts x using a Radix sort, using supplied buffer space. Panics if
+// len(x) is greater than len(buffer). Uses radix sort even on small slices.
+func SortBYOB(x, buffer []float32) {
+	if len(x) > len(buffer) {
+		panic("Buffer too small")
+	}
+	if len(x) < 2 {
+		return
+	}
+
 	nans := 0
 	for idx, val := range x {
 		// Don't sort NaNs, just put them up front and skip them
@@ -45,31 +47,55 @@ func SortBYOB(x []float32, y, z []uint32) {
 			x[idx] = x[nans]
 			x[nans] = val
 			nans++
-		} else {
-			// If there's NaN's we end up using only part of y and z
-			y[idx-nans] = floatFlip(math.Float32bits(val))
 		}
 	}
-	tosort := y[:len(y)-nans]
-	buffer := z[:len(y)-nans]
-	zuint32.SortBYOB(tosort, buffer)
-	for idx, val := range tosort {
-		// Fill in sorted values after NaNs we skipped
-		x[idx+nans] = math.Float32frombits(floatFlop(val))
+	// Each pass processes a byte offset, copying back and forth between slices
+	from := x[nans:]
+	to := buffer[:len(from)]
+	var key uint8
+	var prev float32
+	var uintVal uint32
+	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
+		keyMask := uint32(0xFF << keyOffset) // Current 'digit' to look at
+		var counts [256]int                  // Keep track of the number of elements for each kind of byte
+		var offset [256]int                  // Keep track of where room is made for byte groups in the buffer
+		sorted := true                       // Check for already sorted
+		prev = 0                             // if elem is always >= prev it is already sorted
+		for _, val := range from {
+			uintVal = floatFlip(math.Float32bits(val))
+			key = uint8((uintVal & keyMask) >> keyOffset) // fetch the byte at current 'digit'
+			counts[key]++                                 // count of values to put in this digit's bucket
+			if sorted {                                   // Detect sorted
+				sorted = val >= prev
+				prev = val
+			}
+		}
+		if sorted {
+			if (keyOffset>>radixShift)&uint(1) == 1 {
+				copy(to, from)
+			}
+			return
+		}
+		// Find target bucket offsets
+		for i := 1; i < len(offset); i++ {
+			offset[i] = offset[i-1] + counts[i-1]
+		}
+
+		// Rebucket while copying to other buffer
+		for _, val := range from {
+			uintVal = floatFlip(math.Float32bits(val))
+			key = uint8((uintVal & keyMask) >> keyOffset) // Get the digit
+			to[offset[key]] = val                         // Copy the element to the digit's bucket
+			offset[key]++                                 // One less space, move the offset
+		}
+		// On next pass copy data the other way
+		to, from = from, to
 	}
 }
 
 // Converts a uint32 that represents a true float to one sorts properly
 func floatFlip(x uint32) uint32 {
 	if (x & 0x80000000) == 0x80000000 {
-		return x ^ 0xFFFFFFFF
-	}
-	return x ^ 0x80000000
-}
-
-// Inverse of floatFlip()
-func floatFlop(x uint32) uint32 {
-	if (x & 0x80000000) == 0 {
 		return x ^ 0xFFFFFFFF
 	}
 	return x ^ 0x80000000

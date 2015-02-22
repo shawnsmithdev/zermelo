@@ -53,55 +53,50 @@ type Sorter interface {
 
 // Reuseable buffers
 type zSorter struct {
-	bufInt         []int
-	bufInt32       []int32
-	bufInt64       []int64
-	bufUint        []uint
-	bufUint32Alpha []uint32
-	bufUint32Beta  []uint32
-	bufUint64Alpha []uint64
-	bufUint64Beta  []uint64
+	bufFloat32 []float32
+	bufFloat64 []float64
+	bufInt     []int
+	bufInt32   []int32
+	bufInt64   []int64
+	bufUint    []uint
+	bufUint32  []uint32
+	bufUint64  []uint64
 }
 
+// Checks that buffers are large enough. If not, makes them 25% larger than needed
 func (z *zSorter) prepBuffers(x interface{}) {
 	switch xAsCase := x.(type) {
 	case []float32:
-		if cap(z.bufUint32Alpha) < len(xAsCase) {
-			z.bufUint32Alpha = make([]uint32, len(xAsCase))
-		}
-		if cap(z.bufUint32Beta) < len(xAsCase) {
-			z.bufUint32Beta = make([]uint32, len(xAsCase))
+		if cap(z.bufFloat32) < len(xAsCase) {
+			z.bufFloat32 = make([]float32, (5*len(xAsCase))/4)
 		}
 	case []float64:
-		if cap(z.bufUint64Alpha) < len(xAsCase) {
-			z.bufUint64Alpha = make([]uint64, len(xAsCase))
-		}
-		if cap(z.bufUint64Beta) < len(xAsCase) {
-			z.bufUint64Beta = make([]uint64, len(xAsCase))
+		if cap(z.bufFloat64) < len(xAsCase) {
+			z.bufFloat64 = make([]float64, (5*len(xAsCase))/4)
 		}
 	case []int:
 		if cap(z.bufInt) < len(xAsCase) {
-			z.bufInt = make([]int, len(xAsCase))
+			z.bufInt = make([]int, (5*len(xAsCase))/4)
 		}
 	case []int32:
 		if cap(z.bufInt32) < len(xAsCase) {
-			z.bufInt32 = make([]int32, len(xAsCase))
+			z.bufInt32 = make([]int32, (5*len(xAsCase))/4)
 		}
 	case []int64:
 		if cap(z.bufInt64) < len(xAsCase) {
-			z.bufInt64 = make([]int64, len(xAsCase))
+			z.bufInt64 = make([]int64, (5*len(xAsCase))/4)
 		}
 	case []uint:
 		if cap(z.bufUint) < len(xAsCase) {
-			z.bufUint = make([]uint, len(xAsCase))
+			z.bufUint = make([]uint, (5*len(xAsCase))/4)
 		}
 	case []uint32:
-		if cap(z.bufUint32Alpha) < len(xAsCase) {
-			z.bufUint32Alpha = make([]uint32, len(xAsCase))
+		if cap(z.bufUint32) < len(xAsCase) {
+			z.bufUint32 = make([]uint32, (5*len(xAsCase))/4)
 		}
 	case []uint64:
-		if cap(z.bufUint64Alpha) < len(xAsCase) {
-			z.bufUint64Alpha = make([]uint64, len(xAsCase))
+		if cap(z.bufUint64) < len(xAsCase) {
+			z.bufUint64 = make([]uint64, (5*len(xAsCase))/4)
 		}
 	}
 }
@@ -110,21 +105,21 @@ func (z *zSorter) Sort(x interface{}) error {
 	z.prepBuffers(x)
 	switch xAsCase := x.(type) {
 	case []float32:
-		zfloat32.SortBYOB(xAsCase, z.bufUint32Alpha, z.bufUint32Beta)
+		zfloat32.SortBYOB(xAsCase, z.bufFloat32[:len(xAsCase)])
 	case []float64:
-		zfloat64.SortBYOB(xAsCase, z.bufUint64Alpha, z.bufUint64Beta)
+		zfloat64.SortBYOB(xAsCase, z.bufFloat64[:len(xAsCase)])
 	case []int:
-		zint.SortBYOB(xAsCase, z.bufInt)
+		zint.SortBYOB(xAsCase, z.bufInt[:len(xAsCase)])
 	case []int32:
-		zint32.SortBYOB(xAsCase, z.bufInt32)
+		zint32.SortBYOB(xAsCase, z.bufInt32[:len(xAsCase)])
 	case []int64:
-		zint64.SortBYOB(xAsCase, z.bufInt64)
+		zint64.SortBYOB(xAsCase, z.bufInt64[:len(xAsCase)])
 	case []uint:
-		zuint.SortBYOB(xAsCase, z.bufUint)
+		zuint.SortBYOB(xAsCase, z.bufUint[:len(xAsCase)])
 	case []uint32:
-		zuint32.SortBYOB(xAsCase, z.bufUint32Alpha)
+		zuint32.SortBYOB(xAsCase, z.bufUint32[:len(xAsCase)])
 	case []uint64:
-		zuint64.SortBYOB(xAsCase, z.bufUint64Alpha)
+		zuint64.SortBYOB(xAsCase, z.bufUint64[:len(xAsCase)])
 	case sort.Interface:
 		sort.Sort(xAsCase)
 	default:
