@@ -32,9 +32,8 @@ func TestSortRand(t *testing.T) {
 		SortBYOB(data, buffer)
 		return uintsAreSorted(data)
 	}
-	config := quick.Config{MaxCountScale: 100}
 
-	if err := quick.Check(test, &config); err != nil {
+	if err := quick.Check(test, nil); err != nil {
 		t.Error(err)
 	}
 }

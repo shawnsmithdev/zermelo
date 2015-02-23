@@ -55,9 +55,8 @@ func TestSortRand(t *testing.T) {
 		SortBYOB(r, make([]float64, len(r)))
 		return sort.Float64sAreSorted(r)
 	}
-	config := quick.Config{MaxCountScale: 100}
 
-	if err := quick.Check(test, &config); err != nil {
+	if err := quick.Check(test, nil); err != nil {
 		t.Error(err)
 	}
 }
