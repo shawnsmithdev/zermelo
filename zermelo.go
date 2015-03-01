@@ -8,6 +8,7 @@ import (
 	"github.com/shawnsmithdev/zermelo/zint"
 	"github.com/shawnsmithdev/zermelo/zint32"
 	"github.com/shawnsmithdev/zermelo/zint64"
+	"github.com/shawnsmithdev/zermelo/zstring"
 	"github.com/shawnsmithdev/zermelo/zuint"
 	"github.com/shawnsmithdev/zermelo/zuint32"
 	"github.com/shawnsmithdev/zermelo/zuint64"
@@ -31,6 +32,8 @@ func Sort(x interface{}) error {
 		zint32.Sort(xAsCase)
 	case []int64:
 		zint64.Sort(xAsCase)
+	case []string:
+		zstring.Sort(xAsCase)
 	case []uint:
 		zuint.Sort(xAsCase)
 	case []uint32:
@@ -58,6 +61,7 @@ type zSorter struct {
 	bufInt     []int
 	bufInt32   []int32
 	bufInt64   []int64
+	bufString  []string
 	bufUint    []uint
 	bufUint32  []uint32
 	bufUint64  []uint64
@@ -85,6 +89,10 @@ func (z *zSorter) prepBuffers(x interface{}) {
 	case []int64:
 		if cap(z.bufInt64) < len(xAsCase) {
 			z.bufInt64 = make([]int64, (5*len(xAsCase))/4)
+		}
+	case []string:
+		if cap(z.bufString) < len(xAsCase) {
+			z.bufString = make([]string, (5*len(xAsCase))/4)
 		}
 	case []uint:
 		if cap(z.bufUint) < len(xAsCase) {
@@ -114,6 +122,8 @@ func (z *zSorter) Sort(x interface{}) error {
 		zint32.SortBYOB(xAsCase, z.bufInt32[:len(xAsCase)])
 	case []int64:
 		zint64.SortBYOB(xAsCase, z.bufInt64[:len(xAsCase)])
+	case []string:
+		zstring.SortBYOB(xAsCase, z.bufString[:len(xAsCase)])
 	case []uint:
 		zuint.SortBYOB(xAsCase, z.bufUint[:len(xAsCase)])
 	case []uint32:
@@ -157,6 +167,10 @@ func makeCopy(x interface{}) interface{} {
 		return y
 	case []int64:
 		y := make([]int64, len(xAsCase))
+		copy(y, xAsCase)
+		return y
+	case []string:
+		y := make([]string, len(xAsCase))
 		copy(y, xAsCase)
 		return y
 	case []uint:
