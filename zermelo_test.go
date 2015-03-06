@@ -240,6 +240,25 @@ func genTestDataUint64(x []uint64) {
 	}
 }
 
+func genTestDataString(x []string) {
+	for i := range x {
+		wordLen := (rand.Int() & 31) + 1 // 1-32 long
+		word := make([]byte, wordLen)
+		r := uint64(rand.Int63())
+		ri := 3
+		for wi := range word {
+			shift := uint8(ri * 8)
+			word[wi] = 'a' + (uint8((r&(uint64(0x7F)<<shift))>>shift) % 26)
+			ri--
+			if ri < 0 {
+				ri = 3
+				r = uint64(rand.Int63())
+			}
+		}
+		x[i] = string(word)
+	}
+}
+
 // rand doesn't make generating random singed values easy
 // We generate random int64 between 0 and 2^32 - 1
 // Then we subtract 2^31
@@ -288,6 +307,8 @@ func genTestData(x interface{}) {
 		genTestDataInt32(xAsCase)
 	case []int64:
 		genTestDataInt64(xAsCase)
+	case []string:
+		genTestDataString(xAsCase)
 	case []uint:
 		genTestDataUint(xAsCase)
 	case []uint32:
@@ -312,6 +333,8 @@ func sliceCopy(x interface{}, y interface{}) {
 		copy(x.([]int32), yAsCase)
 	case []int64:
 		copy(x.([]int64), yAsCase)
+	case []string:
+		copy(x.([]string), yAsCase)
 	case []uint:
 		copy(x.([]uint), yAsCase)
 	case []uint32:
@@ -348,6 +371,10 @@ func newGoSorter(x interface{}) sorter {
 	case []int64:
 		return func(y interface{}) {
 			sort.Sort(int64Sortable(y.([]int64)))
+		}
+	case []string:
+		return func(y interface{}) {
+			sort.Strings(y.([]string))
 		}
 	case []uint:
 		return func(y interface{}) {

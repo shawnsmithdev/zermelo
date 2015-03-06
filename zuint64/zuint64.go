@@ -45,10 +45,10 @@ func SortBYOB(x, buffer []uint64) {
 	to := buffer[:len(x)]
 	var key uint8
 	var prev uint64
+	var offset [256]int // Keep track of where groups start
 	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
 		keyMask := uint64(0xFF << keyOffset) // Current 'digit' to look at
 		var counts [256]int                  // Keep track of the number of elements for each kind of byte
-		var offset [256]int                  // Keep track of where room is made for byte groups in the buffer
 		sorted := true                       // Check for already sorted
 		prev = 0                             // if elem is always >= prev it is already sorted
 		for _, elem := range from {
@@ -66,6 +66,7 @@ func SortBYOB(x, buffer []uint64) {
 			return
 		}
 		// Find target bucket offsets
+		offset[0] = 0
 		for i := 1; i < len(offset); i++ {
 			offset[i] = offset[i-1] + counts[i-1]
 		}

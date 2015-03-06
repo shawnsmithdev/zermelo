@@ -6,6 +6,32 @@ import (
 
 // Benchmarks
 
+// []string
+func BenchmarkZSortStringT(b *testing.B) {
+	zermeloSortBencher(b, make([]string, TEST_TINY_SIZE), make([]string, TEST_TINY_SIZE))
+}
+func BenchmarkGoSortStringT(b *testing.B) {
+	goSortBencher(b, make([]string, TEST_TINY_SIZE), make([]string, TEST_TINY_SIZE))
+}
+func BenchmarkZSortStringS(b *testing.B) {
+	zermeloSortBencher(b, make([]string, TEST_SMALL_SIZE), make([]string, TEST_SMALL_SIZE))
+}
+func BenchmarkGoSortStringS(b *testing.B) {
+	goSortBencher(b, make([]string, TEST_SMALL_SIZE), make([]string, TEST_SMALL_SIZE))
+}
+func BenchmarkZSortString(b *testing.B) {
+	zermeloSortBencher(b, make([]string, TEST_SIZE), make([]string, TEST_SIZE))
+}
+func BenchmarkGoSortString(b *testing.B) {
+	goSortBencher(b, make([]string, TEST_SIZE), make([]string, TEST_SIZE))
+}
+func BenchmarkZSortStringB(b *testing.B) {
+	zermeloSortBencher(b, make([]string, TEST_BIG_SIZE), make([]string, TEST_BIG_SIZE))
+}
+func BenchmarkGoSortStringB(b *testing.B) {
+	goSortBencher(b, make([]string, TEST_BIG_SIZE), make([]string, TEST_BIG_SIZE))
+}
+
 // []uint64
 func BenchmarkZSortUint64T(b *testing.B) {
 	zermeloSortBencher(b, make([]uint64, TEST_TINY_SIZE), make([]uint64, TEST_TINY_SIZE))
