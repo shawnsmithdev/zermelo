@@ -189,6 +189,20 @@ func TestSorterFloat64(t *testing.T) {
 	}
 }
 
+func TestSorterString(t *testing.T) {
+	g := make([]string, TEST_SIZE)
+	genTestData(g)
+
+	sorter := New()
+	sorter.Sort(g)
+	for i, val := range g {
+		if i > 0 && val < g[i-1] {
+			log.Printf("Not Sorted!")
+			t.FailNow()
+		}
+	}
+}
+
 // Test data generators
 
 func genSortedTestData(x interface{}) {
@@ -371,10 +385,6 @@ func newGoSorter(x interface{}) sorter {
 	case []int64:
 		return func(y interface{}) {
 			sort.Sort(int64Sortable(y.([]int64)))
-		}
-	case []string:
-		return func(y interface{}) {
-			sort.Strings(y.([]string))
 		}
 	case []uint:
 		return func(y interface{}) {
