@@ -20,6 +20,9 @@ The code in general sacrifices DRY'ness for performance and an easy to use but f
 
 Because this is a radix sort, it has a relatively large O(1) overhead costs in compute time, and will consume O(n) extra memory for the duration of the sort call. You will generally only want to use zermelo if your application is not memory constrained, and you will usually be sorting slices of supported types with at least 256 elements (128 for 32-bit types). The larger the slices you are sorting, the more benefit you will gain by using zermelo instead of the standard library's in-place comparison sort. The algorithm is also slightly adaptive; at certain times in the algorithm if the whole slice is found to be already sorted, no more work will be done. This is not as good as truely adaptive algorithms but will speed things up in certain cases.
 
+### Etymology ###
+Zermelo is named after [Ernst Zermelo](http://en.wikipedia.org/wiki/Ernst_Zermelo), who developed the proof for the well-ordered theorem, The theorem shows that sorting is possible, from a strict axiomatic mathmatical framework.
+
 Zermelo Subpackages
 -------------------
 Using `zermelo.Sort()` allocates buffer space equal in size to the slice you are sorting, which must eventually be garbage collected. It also incurs a (very small) constant overhead for runtime reflection. While premature optimization should be avoided, this behavior may be a performance concern in demanding applications. Zermelo provides individual subpackages for each of the supported types, and new packages will be created as new types become supported. Subpackages have a `SortBYOB()` method where you can Bring Your Own Buffer (BYOB). Providing a buffer that is smaller than the slice you are sorting will cause a runtime panic. The subpackages `zuint` and `zint` must still use reflection as the bit width (32/64) is only available at runtime.
