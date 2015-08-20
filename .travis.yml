@@ -3,4 +3,4 @@ sudo: false
 
 go:
   - 1.2
-  - 1.5rc1
+  - 1.5
