@@ -17,7 +17,7 @@ func TestSort(t *testing.T) {
 		log.Printf("Testing int as 64 bit\n")
 		test = [8]int{3, -1000, -1, 100, 0, 999, int(math.MaxInt64), int(math.MinInt64)}
 	}
-	Sort(test[:])
+	SortBYOB(test[:], make([]int, 8))
 
 	if !intsAreSorted(test[:]) {
 		log.Printf("Should have sorted slice.\n")

@@ -6,12 +6,13 @@ import (
 	"sort"
 )
 
-// Calling zfloat64.Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
-const MinSize = 256
-
-const radix uint = 8
-const radixShift uint = 3
-const bitSize uint = 64
+const (
+	// Calling Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
+	MinSize         = 256
+	radix      uint = 8
+	radixShift uint = 3
+	bitSize    uint = 64
+)
 
 // Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []float64) {
@@ -40,27 +41,29 @@ func SortBYOB(x, buffer []float64) {
 		return
 	}
 
+	// Don't sort NaNs, just put them up front and skip them
 	nans := 0
 	for idx, val := range x {
-		// Don't sort NaNs, just put them up front and skip them
 		if math.IsNaN(val) {
 			x[idx] = x[nans]
 			x[nans] = val
 			nans++
 		}
 	}
+
 	// Each pass processes a byte offset, copying back and forth between slices
 	from := x[nans:]
 	to := buffer[:len(from)]
 	var key uint8
-	var prev float64
 	var uintVal uint64
+	var offset [256]int // Keep track of where room is made for byte groups in the buffer
+
 	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
 		keyMask := uint64(0xFF << keyOffset) // Current 'digit' to look at
 		var counts [256]int                  // Keep track of the number of elements for each kind of byte
-		var offset [256]int                  // Keep track of where room is made for byte groups in the buffer
 		sorted := true                       // Check for already sorted
-		prev = 0                             // if elem is always >= prev it is already sorted
+		prev := float64(0)                   // if elem is always >= prev it is already sorted
+
 		for _, val := range from {
 			uintVal = floatFlip(math.Float64bits(val))
 			key = uint8((uintVal & keyMask) >> keyOffset) // fetch the byte at current 'digit'
@@ -70,13 +73,16 @@ func SortBYOB(x, buffer []float64) {
 				prev = val
 			}
 		}
-		if sorted {
-			if (keyOffset>>radixShift)&uint(1) == 1 {
+
+		if sorted { // Short-circuit sorted
+			if (keyOffset/radix)%2 == 1 {
 				copy(to, from)
 			}
 			return
 		}
+
 		// Find target bucket offsets
+		offset[0] = 0
 		for i := 1; i < len(offset); i++ {
 			offset[i] = offset[i-1] + counts[i-1]
 		}

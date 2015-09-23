@@ -5,10 +5,12 @@ import (
 	"sort"
 )
 
-// Calling zuint32.Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
-const MinSize = 128
-
-const radix = 8
+const (
+	// Calling Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
+	MinSize      = 128
+	radix   uint = 8
+	bitSize uint = 32
+)
 
 // Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []uint32) {
@@ -31,49 +33,56 @@ func SortCopy(x []uint32) []uint32 {
 // Sorts x using a Radix sort, using supplied buffer space. Panics if
 // len(x) does not equal len(buffer). Uses radix sort even on small slices..
 func SortBYOB(x, buffer []uint32) {
-	checkSlices(x, buffer)
-
-	// Radix is a byte, 4 bytes to a uint32
-	for pass := uint(0); pass < 4; pass++ {
-		if pass%2 == 0 { // swap back and forth between buffers to save allocations
-			sortPass(x[:], buffer[:], pass)
-		} else {
-			sortPass(buffer[:], x[:], pass)
-		}
+	if len(x) > len(buffer) {
+		panic("Buffer too small")
 	}
-}
+	if len(x) < 2 {
+		return
+	}
 
-func sortPass(from, to []uint32, pass uint) {
-	byteOffset := pass * radix
-	byteMask := uint32(0xFF << byteOffset)
-	var counts [256]int // Keep track of the number of elements for each kind of byte
+	from := x
+	to := buffer[:len(x)]
+	var key uint8       // Current byte value
 	var offset [256]int // Keep track of where room is made for byte groups in the buffer
-	var passByte uint8  // Current byte value
 
-	for _, elem := range from {
-		// For each elem to sort, fetch the byte at current radix
-		passByte = uint8((elem & byteMask) >> byteOffset)
-		// inc count of bytes of this type
-		counts[passByte]++
-	}
+	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
+		keyMask := uint32(0xFF << keyOffset)
+		var counts [256]int // Keep track of the number of elements for each kind of byte
+		sorted := false
+		prev := uint32(0)
 
-	// Make room for each group of bytes by calculating offset of each
-	offset[0] = 0
-	for i := 1; i < len(offset); i++ {
-		offset[i] = offset[i-1] + counts[i-1]
-	}
+		for _, elem := range from {
+			// For each elem to sort, fetch the byte at current radix
+			key = uint8((elem & keyMask) >> keyOffset)
+			// inc count of bytes of this type
+			counts[key]++
+			if sorted { // Detect sorted
+				sorted = elem >= prev
+				prev = elem
+			}
+		}
 
-	// Swap values between the buffers by radix
-	for _, elem := range from {
-		passByte = uint8((elem & byteMask) >> byteOffset) // Get the byte of each element at the radix
-		to[offset[passByte]] = elem                       // Copy the element depending on byte offsets
-		offset[passByte]++                                // One less space, move the offset
-	}
-}
+		if sorted { // Short-circuit sorted
+			if (keyOffset/radix)%2 == 1 {
+				copy(to, from)
+			}
+			return
+		}
 
-func checkSlices(a, b []uint32) {
-	if a == nil || b == nil || len(a) != len(b) {
-		panic("Slices must be the same size and not nil")
+		// Make room for each group of bytes by calculating offset of each
+		offset[0] = 0
+		for i := 1; i < len(offset); i++ {
+			offset[i] = offset[i-1] + counts[i-1]
+		}
+
+		// Swap values between the buffers by radix
+		for _, elem := range from {
+			key = uint8((elem & keyMask) >> keyOffset) // Get the byte of each element at the radix
+			to[offset[key]] = elem                     // Copy the element depending on byte offsets
+			offset[key]++                              // One less space, move the offset
+		}
+		// Each pass copy data the other way
+		to, from = from, to
 	}
 }
 

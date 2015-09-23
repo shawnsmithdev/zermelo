@@ -5,12 +5,12 @@ import (
 	"sort"
 )
 
-// Calling zuint64.Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
-const MinSize = 256
-
-const radix uint = 8
-const radixShift uint = 3
-const bitSize uint = 64
+const (
+	// Calling Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
+	MinSize      = 256
+	radix   uint = 8
+	bitSize uint = 64
+)
 
 // Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []uint64) {
@@ -44,13 +44,13 @@ func SortBYOB(x, buffer []uint64) {
 	from := x
 	to := buffer[:len(x)]
 	var key uint8
-	var prev uint64
 	var offset [256]int // Keep track of where groups start
+
 	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
 		keyMask := uint64(0xFF << keyOffset) // Current 'digit' to look at
 		var counts [256]int                  // Keep track of the number of elements for each kind of byte
 		sorted := true                       // Check for already sorted
-		prev = 0                             // if elem is always >= prev it is already sorted
+		prev := uint64(0)                    // if elem is always >= prev it is already sorted
 		for _, elem := range from {
 			key = uint8((elem & keyMask) >> keyOffset) // fetch the byte at current 'digit'
 			counts[key]++                              // count of elems to put in this digit's bucket
@@ -59,12 +59,14 @@ func SortBYOB(x, buffer []uint64) {
 				prev = elem
 			}
 		}
-		if sorted {
-			if (keyOffset>>radixShift)&uint(1) == 1 {
+
+		if sorted { // Short-circuit sorted
+			if (keyOffset/radix)%2 == 1 {
 				copy(to, from)
 			}
 			return
 		}
+
 		// Find target bucket offsets
 		offset[0] = 0
 		for i := 1; i < len(offset); i++ {

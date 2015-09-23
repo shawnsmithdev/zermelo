@@ -8,10 +8,17 @@ import (
 	"sort"
 )
 
-// Calling zint.Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
-const MinSize = 256
+const (
+	// Calling Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
+	MinSize      = 256
+	radix   uint = 8
+)
 
-const radix = 8
+var (
+	// Runtime reflection because we don't know if int is 32 or 64 bits.
+	bitSize uint = uint(reflect.TypeOf(int(0)).Bits())
+	minInt  int  = -1 >> (bitSize - 1)
+)
 
 // Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []int) {
@@ -34,66 +41,72 @@ func SortCopy(x []int) []int {
 // Sorts a []int using a Radix sort, using supplied buffer space. Panics if
 // len(x) does not equal len(buffer). Uses radix sort even on small slices.
 func SortBYOB(x, buffer []int) {
-	checkSlices(x, buffer)
-
-	// Reflection because we don't know if int is 32 or 64 bits.
-	passCount := uint(reflect.TypeOf(int(0)).Bits() / radix)
-	for pass := uint(0); pass < passCount; pass++ {
-		if pass%2 == 0 { // swap back and forth between buffers to save allocations
-			sortPass(x[:], buffer[:], pass, pass == passCount-1)
-		} else {
-			sortPass(buffer[:], x[:], pass, pass == passCount-1)
-		}
+	if len(x) > len(buffer) {
+		panic("Buffer too small")
 	}
-}
+	if len(x) < 2 {
+		return
+	}
 
-func sortPass(from, to []int, pass uint, last bool) {
-	byteOffset := pass * radix
-	byteMask := int(0xFF << byteOffset)
-	var counts [256]int // Keep track of the number of elements for each kind of byte
+	from := x
+	to := buffer[:len(x)]
+	var key uint8       // Current byte value
 	var offset [256]int // Keep track of where room is made for byte groups in the buffer
-	var passByte uint8  // Current byte value
-	for _, elem := range from {
-		// For each elem to sort, fetch the byte at current radix
-		passByte = uint8((elem & byteMask) >> byteOffset)
-		// inc count of bytes of this type
-		counts[passByte]++
-	}
 
-	if last {
-		// Handle signed values
-		// Count negative elements (last 128 counts)
-		negCnt := 0
-		for i := 128; i < 256; i++ {
-			negCnt += counts[i]
+	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
+		keyMask := int(0xFF << keyOffset)
+		var counts [256]int // Keep track of the number of elements for each kind of byte
+		sorted := true
+		prev := minInt
+		for _, elem := range from {
+			// For each elem to sort, fetch the byte at current radix
+			key = uint8((elem & keyMask) >> keyOffset)
+			// inc count of bytes of this type
+			counts[key]++
+			if sorted { // Detect sorted
+				sorted = elem >= prev
+				prev = elem
+			}
 		}
 
-		offset[0] = negCnt // Start of positives
-		offset[128] = 0    // Start of negatives
-		for i := 1; i < 128; i++ {
-			// Positive values
-			offset[i] = offset[i-1] + counts[i-1]
-			// Negative values
-			offset[i+128] = offset[i+127] + counts[i+127]
+		if sorted { // Short-circuit sorted
+			if (keyOffset/radix)%2 == 1 {
+				copy(to, from)
+			}
+			return
 		}
-	} else {
-		offset[0] = 0
-		for i := 1; i < len(offset); i++ {
-			offset[i] = offset[i-1] + counts[i-1]
+
+		if keyOffset == bitSize-radix {
+			// Last pass. Handle signed values
+			// Count negative elements (last 128 counts)
+			negCnt := 0
+			for i := 128; i < 256; i++ {
+				negCnt += counts[i]
+			}
+
+			offset[0] = negCnt // Start of positives
+			offset[128] = 0    // Start of negatives
+			for i := 1; i < 128; i++ {
+				// Positive values
+				offset[i] = offset[i-1] + counts[i-1]
+				// Negative values
+				offset[i+128] = offset[i+127] + counts[i+127]
+			}
+		} else {
+			offset[0] = 0
+			for i := 1; i < len(offset); i++ {
+				offset[i] = offset[i-1] + counts[i-1]
+			}
 		}
-	}
 
-	// Swap values between the buffers by radix
-	for _, elem := range from {
-		passByte = uint8((elem & byteMask) >> byteOffset) // Get the byte of each element at the radix
-		to[offset[passByte]] = elem                       // Copy the element depending on byte offsets
-		offset[passByte]++
-	}
-}
-
-func checkSlices(a, b []int) {
-	if a == nil || b == nil || len(a) != len(b) {
-		panic("Slices must be the same size and not nil")
+		// Swap values between the buffers by radix
+		for _, elem := range from {
+			key = uint8((elem & keyMask) >> keyOffset) // Get the byte of each element at the radix
+			to[offset[key]] = elem                     // Copy the element depending on byte offsets
+			offset[key]++
+		}
+		// Each pass reverse buffers
+		to, from = from, to
 	}
 }
 

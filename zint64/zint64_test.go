@@ -9,7 +9,7 @@ import (
 
 func TestSort(t *testing.T) {
 	test := [8]int64{3, -1000, -1, 100, 0, 999, math.MaxInt64, math.MinInt64}
-	Sort(test[:])
+	SortBYOB(test[:], make([]int64, 8))
 
 	if !int64sAreSorted(test[:]) {
 		log.Printf("Should have sorted slice.\n")
@@ -31,7 +31,7 @@ func TestSortRand(t *testing.T) {
 
 func TestSortEmpty(t *testing.T) {
 	test := []int64{}
-	Sort(test)
+	SortBYOB(test, test)
 	if len(test) != 0 {
 		log.Printf("Should still be empty\n")
 		t.FailNow()

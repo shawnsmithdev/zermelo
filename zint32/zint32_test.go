@@ -9,7 +9,7 @@ import (
 
 func TestSort(t *testing.T) {
 	test := [8]int32{3, -1000, -1, 100, 0, 999, math.MaxInt32, math.MinInt32}
-	Sort(test[:])
+	SortBYOB(test[:], make([]int32, 8))
 
 	if !int32sAreSorted(test[:]) {
 		log.Printf("Should have sorted slice.\n")
