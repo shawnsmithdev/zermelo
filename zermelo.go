@@ -65,40 +65,50 @@ type zSorter struct {
 	bufUint64  []uint64
 }
 
-// Checks that buffers are large enough. If not, makes them 25% larger than needed
+// Given an existing buffer capacity and a requested one, finds a new buffer size.
+// For the first alloc this will equal requested size, then after at it leaves
+// a 25% buffer for future growth.
+func allocSize(bufCap, reqLen int) int {
+	if bufCap == 0 {
+		return reqLen
+	}
+	return 5 * reqLen / 4
+}
+
+// Checks that buffers are large enough.
 func (z *zSorter) prepBuffers(x interface{}) {
 	switch xAsCase := x.(type) {
 	case []float32:
 		if cap(z.bufFloat32) < len(xAsCase) {
-			z.bufFloat32 = make([]float32, (5*len(xAsCase))/4)
+			z.bufFloat32 = make([]float32, allocSize(cap(z.bufFloat32), len(xAsCase)))
 		}
 	case []float64:
 		if cap(z.bufFloat64) < len(xAsCase) {
-			z.bufFloat64 = make([]float64, (5*len(xAsCase))/4)
+			z.bufFloat64 = make([]float64, allocSize(cap(z.bufFloat64), len(xAsCase)))
 		}
 	case []int:
 		if cap(z.bufInt) < len(xAsCase) {
-			z.bufInt = make([]int, (5*len(xAsCase))/4)
+			z.bufInt = make([]int, allocSize(cap(z.bufInt), len(xAsCase)))
 		}
 	case []int32:
 		if cap(z.bufInt32) < len(xAsCase) {
-			z.bufInt32 = make([]int32, (5*len(xAsCase))/4)
+			z.bufInt32 = make([]int32, allocSize(cap(z.bufInt32), len(xAsCase)))
 		}
 	case []int64:
 		if cap(z.bufInt64) < len(xAsCase) {
-			z.bufInt64 = make([]int64, (5*len(xAsCase))/4)
+			z.bufInt64 = make([]int64, allocSize(cap(z.bufInt64), len(xAsCase)))
 		}
 	case []uint:
 		if cap(z.bufUint) < len(xAsCase) {
-			z.bufUint = make([]uint, (5*len(xAsCase))/4)
+			z.bufUint = make([]uint, allocSize(cap(z.bufUint), len(xAsCase)))
 		}
 	case []uint32:
 		if cap(z.bufUint32) < len(xAsCase) {
-			z.bufUint32 = make([]uint32, (5*len(xAsCase))/4)
+			z.bufUint32 = make([]uint32, allocSize(cap(z.bufUint32), len(xAsCase)))
 		}
 	case []uint64:
 		if cap(z.bufUint64) < len(xAsCase) {
-			z.bufUint64 = make([]uint64, (5*len(xAsCase))/4)
+			z.bufUint64 = make([]uint64, allocSize(cap(z.bufUint64), len(xAsCase)))
 		}
 	}
 }

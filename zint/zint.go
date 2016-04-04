@@ -1,10 +1,7 @@
 // Radix sort for []int.
-//
-// This package uses runtime reflection to find if int is really int32 or int64.
 package zint
 
 import (
-	"reflect"
 	"sort"
 )
 
@@ -12,11 +9,8 @@ const (
 	// Calling Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
 	MinSize      = 256
 	radix   uint = 8
-)
-
-var (
-	// Runtime reflection because we don't know if int is 32 or 64 bits.
-	bitSize uint = uint(reflect.TypeOf(int(0)).Bits())
+	// Const bit size thanks to kostya-sh@github
+	bitSize uint = 1 << (2 + (^uint(0))>>32&1)
 	minInt  int  = -1 >> (bitSize - 1)
 )
 

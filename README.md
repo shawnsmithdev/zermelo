@@ -25,7 +25,7 @@ Zermelo is named after [Ernst Zermelo](http://en.wikipedia.org/wiki/Ernst_Zermel
 
 Zermelo Subpackages
 -------------------
-Using `zermelo.Sort()` allocates buffer space equal in size to the slice you are sorting, which must eventually be garbage collected. It also incurs a (very small) constant overhead for runtime reflection. While premature optimization should be avoided, this behavior may be a performance concern in demanding applications. Zermelo provides individual subpackages for each of the supported types, and new packages will be created as new types become supported. Subpackages have a `SortBYOB()` method where you can Bring Your Own Buffer (BYOB). Providing a buffer that is smaller than the slice you are sorting will cause a runtime panic. The subpackages `zuint` and `zint` must still use reflection as the bit width (32/64) is only available at runtime.
+Using `zermelo.Sort()` allocates buffer space equal in size to the slice you are sorting, which must eventually be garbage collected. It also incurs a (very small) constant overhead for runtime reflection. While premature optimization should be avoided, this behavior may be a performance concern in demanding applications. Zermelo provides individual subpackages for each of the supported types, and new packages will be created as new types become supported. Subpackages have a `SortBYOB()` method where you can Bring Your Own Buffer (BYOB). Providing a buffer that is smaller than the slice you are sorting will cause a runtime panic.
 
 ```go
 import "github.com/shawnsmithdev/zermelo/zuint64"
@@ -45,7 +45,7 @@ func foo(bar SomeRemoteData)
 Sorter
 ------
 
-A Sorter will reuse buffers created during `Sort()` calls. This is not thread safe. Buffers are grown as needed at a 25% exponential growth rate.  This means if you sort a slice of size `n`, subsequent calls with slices up to `n * 1.25` in length will not cause another buffer allocation.
+A Sorter will reuse buffers created during `Sort()` calls. This is not thread safe. Buffers are grown as needed at a 25% exponential growth rate.  This means if you sort a slice of size `n`, subsequent calls with slices up to `n * 1.25` in length will not cause another buffer allocation. This does not apply to the first allocation, which will make a buffer of the same size as the requested slice. This way, if the slices being sorted do not grow in size, there is no unused buffer space.
 
 ```go
 import "github.com/shawnsmithdev/zermelo"
