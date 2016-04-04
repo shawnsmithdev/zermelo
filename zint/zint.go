@@ -10,7 +10,7 @@ const (
 	MinSize      = 256
 	radix   uint = 8
 	// Const bit size thanks to kostya-sh@github
-	bitSize uint = 1 << (2 + (^uint(0))>>32&1)
+	bitSize uint = 1 << (5 + (^uint(0))>>32&1)
 	minInt  int  = -1 >> (bitSize - 1)
 )
 

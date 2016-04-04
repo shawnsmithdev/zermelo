@@ -3,14 +3,14 @@ package zuint
 import (
 	"log"
 	"math"
-	"reflect"
 	"testing"
 	"testing/quick"
 )
 
 func TestSort(t *testing.T) {
+
 	test := [7]uint{}
-	if reflect.TypeOf(int(0)).Bits() == 32 {
+	if bitSize == 32 {
 		log.Printf("Testing int as 32 bit\n")
 		test = [7]uint{3, 1000, 1, 100, 0, 999, math.MaxInt32}
 	} else {

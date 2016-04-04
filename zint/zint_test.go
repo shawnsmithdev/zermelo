@@ -3,14 +3,13 @@ package zint
 import (
 	"log"
 	"math"
-	"reflect"
 	"testing"
 	"testing/quick"
 )
 
 func TestSort(t *testing.T) {
 	test := [8]int{}
-	if reflect.TypeOf(int(0)).Bits() == 32 {
+	if bitSize == 32 {
 		log.Printf("Testing int as 32 bit\n")
 		test = [8]int{3, -1000, -1, 100, 0, 999, int(math.MaxInt32), int(math.MinInt32)}
 	} else {
