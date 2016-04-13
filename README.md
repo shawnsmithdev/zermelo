@@ -12,20 +12,30 @@ func foo(large []uint64)
 ```
 
 About
-------------
+=====
 
 Zermelo is a sorting library featuring implementations of [radix sort](https://en.wikipedia.org/wiki/Radix_sort "Radix Sort"). I am especially influenced here by [these](http://codercorner.com/RadixSortRevisited.htm "Radix Sort Revisited") [two](http://stereopsis.com/radix.html "Radix Tricks") articles that describe various optimizations and how to work around the typical limitations of radix sort.
 
-The code in general sacrifices DRY'ness for performance and an easy to use but flexible API. The general `Sort()` function works with any supported slice type, while more advanced options are available in subpackages for specific slice types.
+You will generally only want to use zermelo if you won't mind the extra memory used for buffers and your application frequently sorts slices of supported types with at least 256 elements (128 for 32-bit types). The larger the slices you are sorting, the more benefit you will gain by using zermelo instead of the standard library's in-place comparison sort.
 
-Because this is a radix sort, it has a relatively large O(1) overhead costs in compute time, and will consume O(n) extra memory for the duration of the sort call. You will generally only want to use zermelo if your application is not memory constrained, and you will usually be sorting slices of supported types with at least 256 elements (128 for 32-bit types). The larger the slices you are sorting, the more benefit you will gain by using zermelo instead of the standard library's in-place comparison sort. The algorithm is also slightly adaptive; at certain times in the algorithm if the whole slice is found to be already sorted, no more work will be done. This is not as good as truely adaptive algorithms but will speed things up in certain cases.
+Etymology
+---------
+Zermelo is named after [Ernst Zermelo](http://en.wikipedia.org/wiki/Ernst_Zermelo), who developed the proof for the well-ordered theorem.
 
-### Etymology ###
-Zermelo is named after [Ernst Zermelo](http://en.wikipedia.org/wiki/Ernst_Zermelo), who developed the proof for the well-ordered theorem, The theorem shows that sorting is possible, from a strict axiomatic mathmatical framework.
+Supported Types
+===============
+* []float32
+* []float64
+* []int
+* []int32
+* []int64
+* []uint
+* []uint32
+* []uint64
 
-Zermelo Subpackages
--------------------
-Using `zermelo.Sort()` allocates buffer space equal in size to the slice you are sorting, which must eventually be garbage collected. It also incurs a (very small) constant overhead for runtime reflection. While premature optimization should be avoided, this behavior may be a performance concern in demanding applications. Zermelo provides individual subpackages for each of the supported types, and new packages will be created as new types become supported. Subpackages have a `SortBYOB()` method where you can Bring Your Own Buffer (BYOB). Providing a buffer that is smaller than the slice you are sorting will cause a runtime panic.
+Subpackages
+===========
+Zermelo provides individual subpackages for each of the supported types. Subpackages have a `SortBYOB()` method where you can Bring Your Own Buffer (BYOB), for minimizing allocations. Providing a buffer that is smaller than the slice you are sorting will cause a runtime panic.
 
 ```go
 import "github.com/shawnsmithdev/zermelo/zuint64"
@@ -43,7 +53,7 @@ func foo(bar SomeRemoteData)
 ```
 
 Sorter
-------
+======
 
 A Sorter will reuse buffers created during `Sort()` calls. This is not thread safe. Buffers are grown as needed at a 25% exponential growth rate.  This means if you sort a slice of size `n`, subsequent calls with slices up to `n * 1.25` in length will not cause another buffer allocation. This does not apply to the first allocation, which will make a buffer of the same size as the requested slice. This way, if the slices being sorted do not grow in size, there is no unused buffer space.
 
@@ -91,15 +101,3 @@ Run with go 1.4.1 on a 2013 Macbook Air w/ i7-4650U and 8GB ram. For ns/op, lowe
 |256        |41307         |24639          |49.87%     |   4 KB       |
 |65536      |22999127      |3152232        |86.29%     |   1 MB       |
 |1048576    |464524162     |58010014       |87.51%     |  16 MB       |
-
-Supported Types
-===============
-
-* []float32
-* []float64
-* []int
-* []int32
-* []int64
-* []uint
-* []uint32
-* []uint64
