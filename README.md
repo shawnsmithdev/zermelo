@@ -20,7 +20,7 @@ You will generally only want to use zermelo if you won't mind the extra memory u
 
 Etymology
 ---------
-Zermelo is named after [Ernst Zermelo](http://en.wikipedia.org/wiki/Ernst_Zermelo), who developed the proof for the well-ordered theorem.
+Zermelo is named after [Ernst Zermelo](http://en.wikipedia.org/wiki/Ernst_Zermelo), who developed the proof for the [well-ordering theorem](https://en.wikipedia.org/wiki/Well-ordering_theorem).
 
 Supported Types
 ===============
