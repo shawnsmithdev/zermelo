@@ -32,7 +32,7 @@ func TestReflectSortFloat32(t *testing.T) {
 	Sort(r)
 	for i, val := range g {
 		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			log.Printf("exp: [%v]\tact: [%v]\n", val, r[i])
 			t.FailNow()
 		}
 		if i > 0 && val < r[i-1] {
@@ -51,7 +51,7 @@ func TestReflectSortFloat64(t *testing.T) {
 	Sort(r)
 	for i, val := range g {
 		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			log.Printf("exp: [%v]\tact: [%v]\n", val, r[i])
 			t.FailNow()
 		}
 		if i > 0 && val < r[i-1] {
@@ -70,7 +70,7 @@ func TestReflectSortInt(t *testing.T) {
 	Sort(r)
 	for i, val := range g {
 		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			log.Printf("exp: [%v]\tact: [%v]\n", val, r[i])
 			t.FailNow()
 		}
 		if i > 0 && val < r[i-1] {
@@ -89,7 +89,7 @@ func TestReflectSortInt32(t *testing.T) {
 	Sort(r)
 	for i, val := range g {
 		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			log.Printf("exp: [%v]\tact: [%v]\n", val, r[i])
 			t.FailNow()
 		}
 		if i > 0 && val < r[i-1] {
@@ -108,7 +108,7 @@ func TestReflectSortInt64(t *testing.T) {
 	Sort(r)
 	for i, val := range g {
 		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			log.Printf("exp: [%v]\tact: [%v]\n", val, r[i])
 			t.FailNow()
 		}
 		if i > 0 && val < r[i-1] {
@@ -127,7 +127,7 @@ func TestReflectSortUint(t *testing.T) {
 	Sort(r)
 	for i, val := range g {
 		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			log.Printf("exp: [%v]\tact: [%v]\n", val, r[i])
 			t.FailNow()
 		}
 		if i > 0 && val < r[i-1] {
@@ -146,7 +146,7 @@ func TestReflectSortUint32(t *testing.T) {
 	Sort(r)
 	for i, val := range g {
 		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			log.Printf("exp: [%v]\tact: [%v]\n", val, r[i])
 			t.FailNow()
 		}
 		if i > 0 && val < r[i-1] {
@@ -165,7 +165,7 @@ func TestReflectSortUint64(t *testing.T) {
 	Sort(r)
 	for i, val := range g {
 		if r[i] != val {
-			log.Printf("exp: [%d]\tact: [%d]\n", val, r[i])
+			log.Printf("exp: [%v]\tact: [%v]\n", val, r[i])
 			t.FailNow()
 		}
 		if i > 0 && val < r[i-1] {
