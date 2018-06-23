@@ -7,10 +7,10 @@ import (
 	"github.com/shawnsmithdev/zermelo/zint"
 	"github.com/shawnsmithdev/zermelo/zint32"
 	"github.com/shawnsmithdev/zermelo/zint64"
-	"sort"
 	"github.com/shawnsmithdev/zermelo/zuint"
 	"github.com/shawnsmithdev/zermelo/zuint32"
 	"github.com/shawnsmithdev/zermelo/zuint64"
+	"sort"
 )
 
 // A Sorter can sort things like slices. Returns an error on unsupported types.

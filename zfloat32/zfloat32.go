@@ -67,6 +67,7 @@ func SortBYOB(x, buffer []float32) {
 			uintVal = floatFlip(math.Float32bits(val))
 			key = uint8((uintVal & keyMask) >> keyOffset) // fetch the byte at current 'digit'
 			counts[key]++                                 // count of values to put in this digit's bucket
+
 			if sorted { // Detect sorted
 				sorted = val >= prev
 				prev = val

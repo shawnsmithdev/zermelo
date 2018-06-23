@@ -13,7 +13,7 @@ const (
 	bitSize uint = 64
 )
 
-// Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
+// Sort sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []float64) {
 	if len(x) < MinSize {
 		sort.Float64s(x)
@@ -22,7 +22,7 @@ func Sort(x []float64) {
 	}
 }
 
-// Similar to Sort(), but returns a sorted copy of x, leaving x unmodified.
+// SortCopy is similar to Sort, but returns a sorted copy of x, leaving x unmodified.
 func SortCopy(x []float64) []float64 {
 	y := make([]float64, len(x))
 	copy(y, x)
@@ -30,7 +30,7 @@ func SortCopy(x []float64) []float64 {
 	return y
 }
 
-// Sorts x using a Radix sort, using supplied buffer space. Panics if
+// SortBYOB sorts x using a Radix sort, using supplied buffer space. Panics if
 // len(x) is greater than len(buffer). Uses radix sort even on small slices.
 func SortBYOB(x, buffer []float64) {
 	if len(x) > len(buffer) {
@@ -67,6 +67,7 @@ func SortBYOB(x, buffer []float64) {
 			uintVal = floatFlip(math.Float64bits(val))
 			key = uint8((uintVal & keyMask) >> keyOffset) // fetch the byte at current 'digit'
 			counts[key]++                                 // count of values to put in this digit's bucket
+
 			if sorted { // Detect sorted
 				sorted = val >= prev
 				prev = val

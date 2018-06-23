@@ -54,6 +54,7 @@ func SortBYOB(x, buffer []uint64) {
 		for _, elem := range from {
 			key = uint8((elem & keyMask) >> keyOffset) // fetch the byte at current 'digit'
 			counts[key]++                              // count of elems to put in this digit's bucket
+
 			if sorted { // Detect sorted
 				sorted = elem >= prev
 				prev = elem
