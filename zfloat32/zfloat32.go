@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	// MinSize is minimum size of a slice that will be radix sorted by Sort.
+	// MinSize is the minimum size of a slice that will be radix sorted by Sort.
 	MinSize      = 256
 	radix   uint = 8
 	bitSize uint = 32
