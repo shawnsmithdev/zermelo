@@ -1,4 +1,4 @@
-// Radix sort for []int.
+// Package zint implements radix sort for []int.
 package zint
 
 import (
@@ -6,15 +6,15 @@ import (
 )
 
 const (
-	// Calling Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
+	// MinSize is minimum size of a slice that will be radix sorted by Sort.
 	MinSize      = 256
 	radix   uint = 8
 	// Const bit size thanks to kostya-sh@github
 	bitSize uint = 1 << (5 + (^uint(0))>>32&1)
-	minInt  int  = -1 >> (bitSize - 1)
+	minInt       = -1 >> (bitSize - 1)
 )
 
-// Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
+// Sort sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []int) {
 	if len(x) < MinSize {
 		sort.Sort(intSortable(x))
@@ -24,7 +24,7 @@ func Sort(x []int) {
 	}
 }
 
-// Similar to Sort(), but returns a sorted copy of x, leaving x unmodified.
+// SortCopy is similar to Sort, but returns a sorted copy of x, leaving x unmodified.
 func SortCopy(x []int) []int {
 	y := make([]int, len(x))
 	copy(y, x)
@@ -32,7 +32,7 @@ func SortCopy(x []int) []int {
 	return y
 }
 
-// Sorts a []int using a Radix sort, using supplied buffer space. Panics if
+// SortBYOB sorts a []int using a Radix sort, using supplied buffer space. Panics if
 // len(x) does not equal len(buffer). Uses radix sort even on small slices.
 func SortBYOB(x, buffer []int) {
 	if len(x) > len(buffer) {

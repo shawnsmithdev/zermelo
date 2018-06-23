@@ -21,3 +21,5 @@ _testmain.go
 count.out
 *.exe
 *.test
+.idea/
+

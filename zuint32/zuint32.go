@@ -1,4 +1,4 @@
-// Radix sort for []uint32.
+// Package zuint32 implements radix sort for []uint32.
 package zuint32
 
 import (
@@ -6,13 +6,13 @@ import (
 )
 
 const (
-	// Calling Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
+	// MinSize is minimum size of a slice that will be radix sorted by Sort.
 	MinSize      = 128
 	radix   uint = 8
 	bitSize uint = 32
 )
 
-// Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
+// Sort sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []uint32) {
 	if len(x) < MinSize {
 		sort.Sort(uint32Sortable(x))
@@ -22,7 +22,7 @@ func Sort(x []uint32) {
 	}
 }
 
-// Similar to Sort(), but returns a sorted copy of x, leaving x unmodified.
+// SortCopy is similar to Sort, but returns a sorted copy of x, leaving x unmodified.
 func SortCopy(x []uint32) []uint32 {
 	y := make([]uint32, len(x))
 	copy(y, x)
@@ -30,8 +30,8 @@ func SortCopy(x []uint32) []uint32 {
 	return y
 }
 
-// Sorts x using a Radix sort, using supplied buffer space. Panics if
-// len(x) does not equal len(buffer). Uses radix sort even on small slices..
+// SortBYOB sorts x using a Radix sort, using supplied buffer space. Panics if
+// len(x) does not equal len(buffer). Uses radix sort even on small slices.
 func SortBYOB(x, buffer []uint32) {
 	if len(x) > len(buffer) {
 		panic("Buffer too small")

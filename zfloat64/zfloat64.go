@@ -1,4 +1,4 @@
-// Radix sort for []float64.
+// Package zfloat64 implements radix sort for []float64.
 package zfloat64
 
 import (
@@ -7,11 +7,10 @@ import (
 )
 
 const (
-	// Calling Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
-	MinSize         = 256
-	radix      uint = 8
-	radixShift uint = 3
-	bitSize    uint = 64
+	// MinSize is minimum size of a slice that will be radix sorted by Sort.
+	MinSize      = 256
+	radix   uint = 8
+	bitSize uint = 64
 )
 
 // Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
@@ -68,7 +67,7 @@ func SortBYOB(x, buffer []float64) {
 			uintVal = floatFlip(math.Float64bits(val))
 			key = uint8((uintVal & keyMask) >> keyOffset) // fetch the byte at current 'digit'
 			counts[key]++                                 // count of values to put in this digit's bucket
-			if sorted {                                   // Detect sorted
+			if sorted { // Detect sorted
 				sorted = val >= prev
 				prev = val
 			}

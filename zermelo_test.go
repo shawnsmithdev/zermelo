@@ -16,16 +16,16 @@ import (
 	"time"
 )
 
-const TEST_TINY_SIZE = 1 << 6  //   64 * 64bit = 512 B (worse that sort.Sort)
-const TEST_SMALL_SIZE = 1 << 8 //  256 * 64bit = 2 KB (break even is around here)
-const TEST_SIZE = 1 << 16      // ~64k * 64bit = 512 KB
-const TEST_BIG_SIZE = 1 << 20  //  ~1M * 64bit = 8 MB
+const testTinySize = 1 << 6  //   64 * 64bit = 512 B (worse that sort.Sort)
+const testSmallSize = 1 << 8 //  256 * 64bit = 2 KB (break even is around here)
+const testSize = 1 << 16     // ~64k * 64bit = 512 KB
+const testBigSize = 1 << 20  //  ~1M * 64bit = 8 MB
 
 // Compare results of using reflection api instead of directly calling sort func
 
 func TestReflectSortFloat32(t *testing.T) {
-	g := make([]float32, TEST_SIZE)
-	r := make([]float32, TEST_SIZE)
+	g := make([]float32, testSize)
+	r := make([]float32, testSize)
 	genTestDataFloat32(g)
 	copy(r, g)
 	zfloat32.Sort(g)
@@ -43,8 +43,8 @@ func TestReflectSortFloat32(t *testing.T) {
 }
 
 func TestReflectSortFloat64(t *testing.T) {
-	g := make([]float64, TEST_SIZE)
-	r := make([]float64, TEST_SIZE)
+	g := make([]float64, testSize)
+	r := make([]float64, testSize)
 	genTestDataFloat64(g)
 	copy(r, g)
 	zfloat64.Sort(g)
@@ -62,8 +62,8 @@ func TestReflectSortFloat64(t *testing.T) {
 }
 
 func TestReflectSortInt(t *testing.T) {
-	g := make([]int, TEST_SIZE)
-	r := make([]int, TEST_SIZE)
+	g := make([]int, testSize)
+	r := make([]int, testSize)
 	genTestDataInt(g)
 	copy(r, g)
 	zint.Sort(g)
@@ -81,8 +81,8 @@ func TestReflectSortInt(t *testing.T) {
 }
 
 func TestReflectSortInt32(t *testing.T) {
-	g := make([]int32, TEST_SIZE)
-	r := make([]int32, TEST_SIZE)
+	g := make([]int32, testSize)
+	r := make([]int32, testSize)
 	genTestDataInt32(g)
 	copy(r, g)
 	zint32.Sort(g)
@@ -100,8 +100,8 @@ func TestReflectSortInt32(t *testing.T) {
 }
 
 func TestReflectSortInt64(t *testing.T) {
-	g := make([]int64, TEST_SIZE)
-	r := make([]int64, TEST_SIZE)
+	g := make([]int64, testSize)
+	r := make([]int64, testSize)
 	genTestDataInt64(g)
 	copy(r, g)
 	zint64.Sort(g)
@@ -119,8 +119,8 @@ func TestReflectSortInt64(t *testing.T) {
 }
 
 func TestReflectSortUint(t *testing.T) {
-	g := make([]uint, TEST_SIZE)
-	r := make([]uint, TEST_SIZE)
+	g := make([]uint, testSize)
+	r := make([]uint, testSize)
 	genTestDataUint(g)
 	copy(r, g)
 	zuint.Sort(g)
@@ -138,8 +138,8 @@ func TestReflectSortUint(t *testing.T) {
 }
 
 func TestReflectSortUint32(t *testing.T) {
-	g := make([]uint32, TEST_SIZE)
-	r := make([]uint32, TEST_SIZE)
+	g := make([]uint32, testSize)
+	r := make([]uint32, testSize)
 	genTestDataUint32(g)
 	copy(r, g)
 	zuint32.Sort(g)
@@ -157,8 +157,8 @@ func TestReflectSortUint32(t *testing.T) {
 }
 
 func TestReflectSortUint64(t *testing.T) {
-	g := make([]uint64, TEST_SIZE)
-	r := make([]uint64, TEST_SIZE)
+	g := make([]uint64, testSize)
+	r := make([]uint64, testSize)
 	genTestDataUint64(g)
 	copy(r, g)
 	zuint64.Sort(g)
@@ -176,7 +176,7 @@ func TestReflectSortUint64(t *testing.T) {
 }
 
 func TestSorterFloat64(t *testing.T) {
-	g := make([]float64, TEST_SIZE)
+	g := make([]float64, testSize)
 	genTestData(g)
 
 	sorter := New()
@@ -190,7 +190,7 @@ func TestSorterFloat64(t *testing.T) {
 }
 
 func TestSorterString(t *testing.T) {
-	g := make([]string, TEST_SIZE)
+	g := make([]string, testSize)
 	genTestData(g)
 
 	sorter := New()
@@ -225,31 +225,31 @@ func genReversedTestData(x interface{}) {
 
 // Random test data generators
 func genTestDataFloat32(x []float32) {
-	for i, _ := range x {
+	for i := range x {
 		x[i] = rand.Float32()
 	}
 }
 
 func genTestDataFloat64(x []float64) {
-	for i, _ := range x {
+	for i := range x {
 		x[i] = rand.Float64()
 	}
 }
 
 func genTestDataUint(x []uint) {
-	for i, _ := range x {
+	for i := range x {
 		x[i] = uint(rand.Uint32())
 	}
 }
 
 func genTestDataUint32(x []uint32) {
-	for i, _ := range x {
+	for i := range x {
 		x[i] = rand.Uint32()
 	}
 }
 
 func genTestDataUint64(x []uint64) {
-	for i, _ := range x {
+	for i := range x {
 		x[i] = uint64(rand.Int63())
 	}
 }
@@ -277,25 +277,25 @@ func genTestDataString(x []string) {
 // We generate random int64 between 0 and 2^32 - 1
 // Then we subtract 2^31
 func genTestDataInt(x []int) {
-	for i, _ := range x {
+	for i := range x {
 		x[i] = int(rand.Int63n(1<<32) - (1 << 31))
 	}
 }
 
 // Same process here as with genTestDataInt
 func genTestDataInt32(x []int32) {
-	for i, _ := range x {
+	for i := range x {
 		x[i] = int32(rand.Int63n(1<<32) - (1 << 31))
 	}
 }
 
-// For int64 instead we'll just roll the sign bit seperately
+// For int64 instead we'll just roll the sign bit separately
 // This does results in 0 being twice as likely as any other number
 // but the chances are so very remote that it doesn't matter for tests
 func genTestDataInt64(x []int64) {
 	var tmp int64
 	var isNeg bool
-	for i, _ := range x {
+	for i := range x {
 		tmp = rand.Int63()
 		isNeg = 1 == (1 & rand.Uint32())
 		if isNeg {

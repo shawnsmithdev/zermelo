@@ -1,4 +1,4 @@
-// Radix sort for []uint64.
+// Package zuint64 implements radix sort for []uint64.
 package zuint64
 
 import (
@@ -6,13 +6,13 @@ import (
 )
 
 const (
-	// Calling Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
+	// MinSize is minimum size of a slice that will be radix sorted by Sort.
 	MinSize      = 256
 	radix   uint = 8
 	bitSize uint = 64
 )
 
-// Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
+// Sort Sort x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []uint64) {
 	if len(x) < MinSize {
 		sort.Sort(uint64Sortable(x))
@@ -22,7 +22,7 @@ func Sort(x []uint64) {
 	}
 }
 
-// Similar to Sort(), but returns a sorted copy of x, leaving x unmodified.
+// SortCopy is similar to Sort, but returns a sorted copy of x, leaving x unmodified.
 func SortCopy(x []uint64) []uint64 {
 	y := make([]uint64, len(x))
 	copy(y, x)
@@ -30,7 +30,7 @@ func SortCopy(x []uint64) []uint64 {
 	return y
 }
 
-// Sorts x using a Radix sort, using supplied buffer space. Panics if
+// SortBYOB sorts x using a Radix sort, using supplied buffer space. Panics if
 // len(x) is greater than len(buffer). Uses radix sort even on small slices.
 func SortBYOB(x, buffer []uint64) {
 	if len(x) > len(buffer) {
@@ -54,7 +54,7 @@ func SortBYOB(x, buffer []uint64) {
 		for _, elem := range from {
 			key = uint8((elem & keyMask) >> keyOffset) // fetch the byte at current 'digit'
 			counts[key]++                              // count of elems to put in this digit's bucket
-			if sorted {                                // Detect sorted
+			if sorted { // Detect sorted
 				sorted = elem >= prev
 				prev = elem
 			}

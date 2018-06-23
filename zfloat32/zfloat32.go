@@ -1,4 +1,4 @@
-// Radix sort for []float32.
+// Package zfloat32 implements radix sort for []float32.
 package zfloat32
 
 import (
@@ -7,14 +7,13 @@ import (
 )
 
 const (
-	// Calling Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
-	MinSize         = 256
-	radix      uint = 8
-	radixShift uint = 3
-	bitSize    uint = 32
+	// MinSize is minimum size of a slice that will be radix sorted by Sort.
+	MinSize      = 256
+	radix   uint = 8
+	bitSize uint = 32
 )
 
-// Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
+// Sort sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []float32) {
 	if len(x) < MinSize {
 		sort.Sort(float32Sortable(x))
@@ -23,7 +22,7 @@ func Sort(x []float32) {
 	}
 }
 
-// Similar to Sort(), but returns a sorted copy of x, leaving x unmodified.
+// SortCopy is similar to Sort(), but returns a sorted copy of x, leaving x unmodified.
 func SortCopy(x []float32) []float32 {
 	y := make([]float32, len(x))
 	copy(y, x)
@@ -31,7 +30,7 @@ func SortCopy(x []float32) []float32 {
 	return y
 }
 
-// Sorts x using a Radix sort, using supplied buffer space. Panics if
+// SortBYOB sorts x using a Radix sort, using supplied buffer space. Panics if
 // len(x) is greater than len(buffer). Uses radix sort even on small slices.
 func SortBYOB(x, buffer []float32) {
 	if len(x) > len(buffer) {
@@ -68,7 +67,7 @@ func SortBYOB(x, buffer []float32) {
 			uintVal = floatFlip(math.Float32bits(val))
 			key = uint8((uintVal & keyMask) >> keyOffset) // fetch the byte at current 'digit'
 			counts[key]++                                 // count of values to put in this digit's bucket
-			if sorted {                                   // Detect sorted
+			if sorted { // Detect sorted
 				sorted = val >= prev
 				prev = val
 			}

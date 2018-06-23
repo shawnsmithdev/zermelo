@@ -1,4 +1,4 @@
-// Radix sort for []int64.
+// Package zint64 implements radix sort for []int64.
 package zint64
 
 import (
@@ -6,14 +6,14 @@ import (
 )
 
 const (
-	// Calling Sort() on slices smaller than this will result is sorting with sort.Sort() instead.
+	// MinSize is minimum size of a slice that will be radix sorted by Sort.
 	MinSize        = 256
 	radix    uint  = 8
 	bitSize  uint  = 64
 	minInt64 int64 = -1 << 63
 )
 
-// Sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
+// Sort sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []int64) {
 	if len(x) < MinSize {
 		sort.Sort(int64Sortable(x))
@@ -23,7 +23,7 @@ func Sort(x []int64) {
 	}
 }
 
-// Similar to Sort(), but returns a sorted copy of x, leaving x unmodified.
+// SortCopy is similar to Sort, but returns a sorted copy of x, leaving x unmodified.
 func SortCopy(x []int64) []int64 {
 	y := make([]int64, len(x))
 	copy(y, x)
@@ -31,7 +31,7 @@ func SortCopy(x []int64) []int64 {
 	return y
 }
 
-// Sorts a []int64 using a Radix sort, using supplied buffer space. Panics if
+// SortBYOB sorts a []int64 using a Radix sort, using supplied buffer space. Panics if
 // len(x) does not equal len(buffer). Uses radix sort even on small slices.
 func SortBYOB(x, buffer []int64) {
 	if len(x) > len(buffer) {
