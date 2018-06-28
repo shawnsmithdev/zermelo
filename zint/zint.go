@@ -17,7 +17,7 @@ const (
 // Sort sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []int) {
 	if len(x) < MinSize {
-		sort.Sort(intSortable(x))
+		sort.Ints(x)
 	} else {
 		buffer := make([]int, len(x))
 		SortBYOB(x, buffer)
@@ -103,9 +103,3 @@ func SortBYOB(x, buffer []int) {
 		to, from = from, to
 	}
 }
-
-type intSortable []int
-
-func (r intSortable) Len() int           { return len(r) }
-func (r intSortable) Less(i, j int) bool { return r[i] < r[j] }
-func (r intSortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }

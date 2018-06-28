@@ -16,7 +16,7 @@ const (
 // Sort sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
 func Sort(x []float32) {
 	if len(x) < MinSize {
-		sort.Sort(float32Sortable(x))
+		sort.Slice(x, func(i, j int) bool { return x[i] < x[j] })
 	} else {
 		SortBYOB(x, make([]float32, len(x)))
 	}

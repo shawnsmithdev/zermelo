@@ -366,10 +366,6 @@ type sorter func(interface{})
 // Attempts to return the best the sort package has to offer for the given type
 func newGoSorter(x interface{}) sorter {
 	switch x.(type) {
-	case []float32:
-		return func(y interface{}) {
-			sort.Sort(float32Sortable(y.([]float32)))
-		}
 	case []float64:
 		return func(y interface{}) {
 			sort.Float64s(y.([]float64))
@@ -378,65 +374,37 @@ func newGoSorter(x interface{}) sorter {
 		return func(y interface{}) {
 			sort.Ints(y.([]int))
 		}
+	case []float32:
+		return func(y interface{}) {
+			z := y.([]float32)
+			sort.Slice(z, func(i, j int) bool { return z[i] < z[j] })
+		}
 	case []int32:
 		return func(y interface{}) {
-			sort.Sort(int32Sortable(y.([]int32)))
+			z := y.([]int32)
+			sort.Slice(z, func(i, j int) bool { return z[i] < z[j] })
 		}
 	case []int64:
 		return func(y interface{}) {
-			sort.Sort(int64Sortable(y.([]int64)))
+			z := y.([]int64)
+			sort.Slice(z, func(i, j int) bool { return z[i] < z[j] })
 		}
 	case []uint:
 		return func(y interface{}) {
-			sort.Sort(uintSortable(y.([]uint)))
+			z := y.([]uint)
+			sort.Slice(z, func(i, j int) bool { return z[i] < z[j] })
 		}
 	case []uint32:
 		return func(y interface{}) {
-			sort.Sort(uint32Sortable(y.([]uint32)))
+			z := y.([]uint32)
+			sort.Slice(z, func(i, j int) bool { return z[i] < z[j] })
 		}
 	case []uint64:
 		return func(y interface{}) {
-			sort.Sort(uint64Sortable(y.([]uint64)))
+			z := y.([]uint64)
+			sort.Slice(z, func(i, j int) bool { return z[i] < z[j] })
 		}
 	default:
 		panic("not supported")
 	}
 }
-
-// Only Float64 and int are directly sortable by the sort package.
-// So these implement sort.Interface for everything else
-type float32Sortable []float32
-
-func (r float32Sortable) Len() int           { return len(r) }
-func (r float32Sortable) Less(i, j int) bool { return r[i] < r[j] }
-func (r float32Sortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
-
-type int32Sortable []int32
-
-func (r int32Sortable) Len() int           { return len(r) }
-func (r int32Sortable) Less(i, j int) bool { return r[i] < r[j] }
-func (r int32Sortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
-
-type int64Sortable []int64
-
-func (r int64Sortable) Len() int           { return len(r) }
-func (r int64Sortable) Less(i, j int) bool { return r[i] < r[j] }
-func (r int64Sortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
-
-type uintSortable []uint
-
-func (r uintSortable) Len() int           { return len(r) }
-func (r uintSortable) Less(i, j int) bool { return r[i] < r[j] }
-func (r uintSortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
-
-type uint32Sortable []uint32
-
-func (r uint32Sortable) Len() int           { return len(r) }
-func (r uint32Sortable) Less(i, j int) bool { return r[i] < r[j] }
-func (r uint32Sortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
-
-type uint64Sortable []uint64
-
-func (r uint64Sortable) Len() int           { return len(r) }
-func (r uint64Sortable) Less(i, j int) bool { return r[i] < r[j] }
-func (r uint64Sortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }

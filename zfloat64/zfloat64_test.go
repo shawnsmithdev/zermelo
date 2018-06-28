@@ -35,7 +35,7 @@ func TestSortCopy(t *testing.T) {
 }
 
 func TestSortEmpty(t *testing.T) {
-	r := []float64{}
+	var r []float64
 	Sort(r)
 	if len(r) != 0 {
 		log.Printf("Should have been empty\n")
