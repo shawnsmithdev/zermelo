@@ -15,16 +15,16 @@ import (
 	"time"
 )
 
-const testTinySize = 1 << 6  //   64 * 64bit = 512 B (worse that sort.Sort)
-const testSmallSize = 1 << 8 //  256 * 64bit = 2 KB (break even is around here)
-const testSize = 1 << 16     // ~64k * 64bit = 512 KB
-const testBigSize = 1 << 20  //  ~1M * 64bit = 8 MB
+const testTinySize = 64       //  64 * 64bit = 512 B (worse that sort.Sort)
+const testSmallSize = 256     // 256 * 64bit = 2 KB (break even is around here)
+const testMediumSize = 1024   // ~1k * 64bit = 8 KB
+const testLargeSize = 1 << 20 // ~1M * 64bit = 8 MB
 
 // Compare results of using reflection api instead of directly calling sort func
 
 func TestReflectSortFloat32(t *testing.T) {
-	g := make([]float32, testSize)
-	r := make([]float32, testSize)
+	g := make([]float32, testMediumSize)
+	r := make([]float32, testMediumSize)
 	genTestDataFloat32(g)
 	copy(r, g)
 	zfloat32.Sort(g)
@@ -42,8 +42,8 @@ func TestReflectSortFloat32(t *testing.T) {
 }
 
 func TestReflectSortFloat64(t *testing.T) {
-	g := make([]float64, testSize)
-	r := make([]float64, testSize)
+	g := make([]float64, testMediumSize)
+	r := make([]float64, testMediumSize)
 	genTestDataFloat64(g)
 	copy(r, g)
 	zfloat64.Sort(g)
@@ -61,8 +61,8 @@ func TestReflectSortFloat64(t *testing.T) {
 }
 
 func TestReflectSortInt(t *testing.T) {
-	g := make([]int, testSize)
-	r := make([]int, testSize)
+	g := make([]int, testMediumSize)
+	r := make([]int, testMediumSize)
 	genTestDataInt(g)
 	copy(r, g)
 	zint.Sort(g)
@@ -80,8 +80,8 @@ func TestReflectSortInt(t *testing.T) {
 }
 
 func TestReflectSortInt32(t *testing.T) {
-	g := make([]int32, testSize)
-	r := make([]int32, testSize)
+	g := make([]int32, testMediumSize)
+	r := make([]int32, testMediumSize)
 	genTestDataInt32(g)
 	copy(r, g)
 	zint32.Sort(g)
@@ -99,8 +99,8 @@ func TestReflectSortInt32(t *testing.T) {
 }
 
 func TestReflectSortInt64(t *testing.T) {
-	g := make([]int64, testSize)
-	r := make([]int64, testSize)
+	g := make([]int64, testMediumSize)
+	r := make([]int64, testMediumSize)
 	genTestDataInt64(g)
 	copy(r, g)
 	zint64.Sort(g)
@@ -118,8 +118,8 @@ func TestReflectSortInt64(t *testing.T) {
 }
 
 func TestReflectSortUint(t *testing.T) {
-	g := make([]uint, testSize)
-	r := make([]uint, testSize)
+	g := make([]uint, testMediumSize)
+	r := make([]uint, testMediumSize)
 	genTestDataUint(g)
 	copy(r, g)
 	zuint.Sort(g)
@@ -137,8 +137,8 @@ func TestReflectSortUint(t *testing.T) {
 }
 
 func TestReflectSortUint32(t *testing.T) {
-	g := make([]uint32, testSize)
-	r := make([]uint32, testSize)
+	g := make([]uint32, testMediumSize)
+	r := make([]uint32, testMediumSize)
 	genTestDataUint32(g)
 	copy(r, g)
 	zuint32.Sort(g)
@@ -156,8 +156,8 @@ func TestReflectSortUint32(t *testing.T) {
 }
 
 func TestReflectSortUint64(t *testing.T) {
-	g := make([]uint64, testSize)
-	r := make([]uint64, testSize)
+	g := make([]uint64, testMediumSize)
+	r := make([]uint64, testMediumSize)
 	genTestDataUint64(g)
 	copy(r, g)
 	zuint64.Sort(g)
@@ -175,7 +175,7 @@ func TestReflectSortUint64(t *testing.T) {
 }
 
 func TestSorterFloat64(t *testing.T) {
-	g := make([]float64, testSize)
+	g := make([]float64, testMediumSize)
 	genTestData(g)
 
 	sorter := New()
@@ -189,7 +189,7 @@ func TestSorterFloat64(t *testing.T) {
 }
 
 func TestSorterString(t *testing.T) {
-	g := make([]string, testSize)
+	g := make([]string, testMediumSize)
 	genTestData(g)
 
 	sorter := New()

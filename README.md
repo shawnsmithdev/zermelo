@@ -72,32 +72,25 @@ func foo(bar [][]uint64) {
 Benchmarks
 ==========
 
-Benchmarks are not a promise of anything. You'll always want to profile for your use case.
-
-You can run these on your own hardware
+You can run the benchmark on your own hardware.
 
 ```Shell
 go test -v -bench . -benchmem
 ```
 
-Run with go 1.4.1 on a 2013 Macbook Air w/ i7-4650U and 8GB ram. For ns/op, lower is better.
+The benchmark tests two types of slices:
+* `[]uint64`
+* `[]float64`
 
-[]uint64
---------
+For each of the tested types, it runs the benchmark a slice of that type with four sizes:
+* `T` (tiny) 64
+* `S` (small) 256
+* `M` (medium) 1024
+* `L` (large) 1048576
 
-| slice len | golang ns/op | zermelo ns/op |Improvement|zermelo memory|
-|-----------|--------------|---------------|-----------|--------------|
-|64         |3783          |3617           | 4.39%     |  32  B       |
-|256        |25839         |20707          |19.86%     |   2 KB       |
-|65536      |14931449      |2593829        |82.63%     | 512 KB       |
-|1048576    |298591046     |53842130       |81.97%     |   8 MB       |
+For each slice type and size, it bencharks three sorters:
+* GoSort - The standard library sort: `sort.Slice()`, `sort.Ints()`, or `sort.Float64s`
+* ZSort - `zermelo.Sort()`, does not reuse buffers
+* ZSorter - `zermelo.New().Sort()`, does reuse buffers
 
-[]float64
----------
-
-| slice len | golang ns/op | zermelo ns/op |Improvement|zermelo memory|
-|-----------|--------------|---------------|-----------|--------------|
-|64         |6555          |6563           |-0.12%     |  32  B       |
-|256        |41307         |24639          |49.87%     |   4 KB       |
-|65536      |22999127      |3152232        |86.29%     |   1 MB       |
-|1048576    |464524162     |58010014       |87.51%     |  16 MB       |
+One pass for each sorter is also made against a large, presorted `[]uint64`.

@@ -25,23 +25,23 @@ func BenchmarkZSorterUint64S(b *testing.B) {
 func BenchmarkGoSortUint64S(b *testing.B) {
 	testSortBencher(b, make([]uint64, testSmallSize), make([]uint64, testSmallSize), goSorter)
 }
-func BenchmarkZSortUint64(b *testing.B) {
-	testSortBencher(b, make([]uint64, testSize), make([]uint64, testSize), Sort)
+func BenchmarkZSortUint64M(b *testing.B) {
+	testSortBencher(b, make([]uint64, testMediumSize), make([]uint64, testMediumSize), Sort)
 }
-func BenchmarkZSorterUint64(b *testing.B) {
-	testSortBencher(b, make([]uint64, testSize), make([]uint64, testSize), New().Sort)
+func BenchmarkZSorterUint64M(b *testing.B) {
+	testSortBencher(b, make([]uint64, testMediumSize), make([]uint64, testMediumSize), New().Sort)
 }
-func BenchmarkGoSortUint64(b *testing.B) {
-	testSortBencher(b, make([]uint64, testSize), make([]uint64, testSize), goSorter)
+func BenchmarkGoSortUint64M(b *testing.B) {
+	testSortBencher(b, make([]uint64, testMediumSize), make([]uint64, testMediumSize), goSorter)
 }
-func BenchmarkZSortUint64B(b *testing.B) {
-	testSortBencher(b, make([]uint64, testBigSize), make([]uint64, testBigSize), Sort)
+func BenchmarkZSortUint64L(b *testing.B) {
+	testSortBencher(b, make([]uint64, testLargeSize), make([]uint64, testLargeSize), Sort)
 }
-func BenchmarkZSorterUint64B(b *testing.B) {
-	testSortBencher(b, make([]uint64, testBigSize), make([]uint64, testBigSize), New().Sort)
+func BenchmarkZSorterUint64L(b *testing.B) {
+	testSortBencher(b, make([]uint64, testLargeSize), make([]uint64, testLargeSize), New().Sort)
 }
-func BenchmarkGoSortUint64B(b *testing.B) {
-	testSortBencher(b, make([]uint64, testBigSize), make([]uint64, testBigSize), goSorter)
+func BenchmarkGoSortUint64L(b *testing.B) {
+	testSortBencher(b, make([]uint64, testLargeSize), make([]uint64, testLargeSize), goSorter)
 }
 
 // []float64
@@ -63,33 +63,33 @@ func BenchmarkZSorterFloat64S(b *testing.B) {
 func BenchmarkGoSortFloat64S(b *testing.B) {
 	testSortBencher(b, make([]float64, testSmallSize), make([]float64, testSmallSize), goSorter)
 }
-func BenchmarkZSortFloat64(b *testing.B) {
-	testSortBencher(b, make([]float64, testSize), make([]float64, testSize), Sort)
+func BenchmarkZSortFloat64M(b *testing.B) {
+	testSortBencher(b, make([]float64, testMediumSize), make([]float64, testMediumSize), Sort)
 }
-func BenchmarkZSorterFloat64(b *testing.B) {
-	testSortBencher(b, make([]float64, testSize), make([]float64, testSize), New().Sort)
+func BenchmarkZSorterFloat64M(b *testing.B) {
+	testSortBencher(b, make([]float64, testMediumSize), make([]float64, testMediumSize), New().Sort)
 }
-func BenchmarkGoSortFloat64(b *testing.B) {
-	testSortBencher(b, make([]float64, testSize), make([]float64, testSize), goSorter)
+func BenchmarkGoSortFloat64M(b *testing.B) {
+	testSortBencher(b, make([]float64, testMediumSize), make([]float64, testMediumSize), goSorter)
 }
-func BenchmarkZSortFloat64B(b *testing.B) {
-	testSortBencher(b, make([]float64, testBigSize), make([]float64, testBigSize), Sort)
+func BenchmarkZSortFloat64L(b *testing.B) {
+	testSortBencher(b, make([]float64, testLargeSize), make([]float64, testLargeSize), Sort)
 }
-func BenchmarkZSorterFloat64B(b *testing.B) {
-	testSortBencher(b, make([]float64, testBigSize), make([]float64, testBigSize), New().Sort)
+func BenchmarkZSorterFloat64L(b *testing.B) {
+	testSortBencher(b, make([]float64, testLargeSize), make([]float64, testLargeSize), New().Sort)
 }
-func BenchmarkGoSortFloat64B(b *testing.B) {
-	testSortBencher(b, make([]float64, testBigSize), make([]float64, testBigSize), goSorter)
+func BenchmarkGoSortFloat64L(b *testing.B) {
+	testSortBencher(b, make([]float64, testLargeSize), make([]float64, testLargeSize), goSorter)
 }
 
-func BenchmarkZSortSorted(b *testing.B) {
-	testSortedBencher(b, make([]uint64, testBigSize), make([]uint64, testBigSize), Sort)
+func BenchmarkZSortSortedL(b *testing.B) {
+	testSortedBencher(b, make([]uint64, testLargeSize), make([]uint64, testLargeSize), Sort)
 }
-func BenchmarkZSorterSorted(b *testing.B) {
-	testSortedBencher(b, make([]uint64, testBigSize), make([]uint64, testBigSize), New().Sort)
+func BenchmarkZSorterSortedL(b *testing.B) {
+	testSortedBencher(b, make([]uint64, testLargeSize), make([]uint64, testLargeSize), New().Sort)
 }
-func BenchmarkGoSortSorted(b *testing.B) {
-	testSortedBencher(b, make([]uint64, testBigSize), make([]uint64, testBigSize), goSorter)
+func BenchmarkGoSortSortedL(b *testing.B) {
+	testSortedBencher(b, make([]uint64, testLargeSize), make([]uint64, testLargeSize), goSorter)
 }
 
 // Benchmarking Utility Functions
