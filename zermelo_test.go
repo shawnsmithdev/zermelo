@@ -11,7 +11,6 @@ import (
 	"github.com/shawnsmithdev/zermelo/zuint64"
 	"log"
 	"math/rand"
-	"sort"
 	"testing"
 	"time"
 )
@@ -355,55 +354,6 @@ func sliceCopy(x interface{}, y interface{}) {
 		copy(x.([]uint32), yAsCase)
 	case []uint64:
 		copy(x.([]uint64), yAsCase)
-	default:
-		panic("not supported")
-	}
-}
-
-// Go's not embracing immutability is one of its weaknesses.
-type sorter func(interface{})
-
-// Attempts to return the best the sort package has to offer for the given type
-func newGoSorter(x interface{}) sorter {
-	switch x.(type) {
-	case []float64:
-		return func(y interface{}) {
-			sort.Float64s(y.([]float64))
-		}
-	case []int:
-		return func(y interface{}) {
-			sort.Ints(y.([]int))
-		}
-	case []float32:
-		return func(y interface{}) {
-			z := y.([]float32)
-			sort.Slice(z, func(i, j int) bool { return z[i] < z[j] })
-		}
-	case []int32:
-		return func(y interface{}) {
-			z := y.([]int32)
-			sort.Slice(z, func(i, j int) bool { return z[i] < z[j] })
-		}
-	case []int64:
-		return func(y interface{}) {
-			z := y.([]int64)
-			sort.Slice(z, func(i, j int) bool { return z[i] < z[j] })
-		}
-	case []uint:
-		return func(y interface{}) {
-			z := y.([]uint)
-			sort.Slice(z, func(i, j int) bool { return z[i] < z[j] })
-		}
-	case []uint32:
-		return func(y interface{}) {
-			z := y.([]uint32)
-			sort.Slice(z, func(i, j int) bool { return z[i] < z[j] })
-		}
-	case []uint64:
-		return func(y interface{}) {
-			z := y.([]uint64)
-			sort.Slice(z, func(i, j int) bool { return z[i] < z[j] })
-		}
 	default:
 		panic("not supported")
 	}

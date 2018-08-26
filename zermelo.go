@@ -31,14 +31,14 @@ func Sort(x interface{}) error {
 		zint32.Sort(xAsCase)
 	case []int64:
 		zint64.Sort(xAsCase)
-	case []string:
-		sort.Strings(xAsCase)
 	case []uint:
 		zuint.Sort(xAsCase)
 	case []uint32:
 		zuint32.Sort(xAsCase)
 	case []uint64:
 		zuint64.Sort(xAsCase)
+	case []string:
+		sort.Strings(xAsCase)
 	case sort.Interface:
 		sort.Sort(xAsCase)
 	default:

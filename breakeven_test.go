@@ -89,8 +89,8 @@ func TestBreakEvenUint64Reversed(t *testing.T) {
 }
 
 func breakEvenTest(g, r interface{}, minSize uint, t *testing.T, genFunc func(interface{})) uint {
-	gsort := newGoSorter(g)
-	zsort := New()
+	gsort := goSorter
+	zsort := newRawSorter().Sort
 	for size := uint(breakEvenStartSize); size < minSize; size++ {
 		var retry uint
 		max := uint(65)
@@ -99,7 +99,7 @@ func breakEvenTest(g, r interface{}, minSize uint, t *testing.T, genFunc func(in
 			x := sliceSlice(r, size)
 			sliceCopy(x, g)
 			start := time.Now().UnixNano()
-			zsort.Sort(x)
+			zsort(x)
 			ztime := time.Now().UnixNano() - start
 			sliceCopy(x, g)
 			start = time.Now().UnixNano()

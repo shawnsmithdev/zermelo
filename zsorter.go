@@ -29,6 +29,8 @@ type zSorter struct {
 	bufUint    []uint
 	bufUint32  []uint32
 	bufUint64  []uint64
+	// if true, use go stdlib sort on small slices
+	useGoSort bool
 }
 
 // Given an existing buffer capacity and a requested one, finds a new buffer size.
@@ -41,97 +43,114 @@ func allocSize(bufCap, reqLen int) int {
 	return 5 * reqLen / 4
 }
 
-func (z *zSorter) prepFloat32(size int) {
+func (z *zSorter) prepFloat32(size int) []float32 {
 	if cap(z.bufFloat32) < size {
 		z.bufFloat32 = make([]float32, allocSize(cap(z.bufFloat32), size))
 	}
+	return z.bufFloat32
 }
 
-func (z *zSorter) prepFloat64(size int) {
+func (z *zSorter) prepFloat64(size int) []float64 {
 	if cap(z.bufFloat64) < size {
 		z.bufFloat64 = make([]float64, allocSize(cap(z.bufFloat64), size))
 	}
+	return z.bufFloat64
 }
 
-func (z *zSorter) prepInt(size int) {
+func (z *zSorter) prepInt(size int) []int {
 	if cap(z.bufInt) < size {
 		z.bufInt = make([]int, allocSize(cap(z.bufInt), size))
 	}
+	return z.bufInt
 }
 
-func (z *zSorter) prepInt32(size int) {
+func (z *zSorter) prepInt32(size int) []int32 {
 	if cap(z.bufInt32) < size {
 		z.bufInt32 = make([]int32, allocSize(cap(z.bufInt32), size))
 	}
+	return z.bufInt32
 }
 
-func (z *zSorter) prepInt64(size int) {
+func (z *zSorter) prepInt64(size int) []int64 {
 	if cap(z.bufInt64) < size {
 		z.bufInt64 = make([]int64, allocSize(cap(z.bufInt64), size))
 	}
+	return z.bufInt64
 }
 
-func (z *zSorter) prepUint(size int) {
+func (z *zSorter) prepUint(size int) []uint {
 	if cap(z.bufUint) < size {
 		z.bufUint = make([]uint, allocSize(cap(z.bufUint), size))
 	}
+	return z.bufUint
 }
 
-func (z *zSorter) prepUint32(size int) {
+func (z *zSorter) prepUint32(size int) []uint32 {
 	if cap(z.bufUint32) < size {
 		z.bufUint32 = make([]uint32, allocSize(cap(z.bufUint32), size))
 	}
+	return z.bufUint32
 }
 
-func (z *zSorter) prepUint64(size int) {
+func (z *zSorter) prepUint64(size int) []uint64 {
 	if cap(z.bufUint64) < size {
 		z.bufUint64 = make([]uint64, allocSize(cap(z.bufUint64), size))
 	}
-}
-
-// Checks that buffers are large enough.
-func (z *zSorter) prepBuffers(x interface{}) {
-	switch xAsCase := x.(type) {
-	case []float32:
-		z.prepFloat32(len(xAsCase))
-	case []float64:
-		z.prepFloat64(len(xAsCase))
-	case []int:
-		z.prepInt(len(xAsCase))
-	case []int32:
-		z.prepInt32(len(xAsCase))
-	case []int64:
-		z.prepInt64(len(xAsCase))
-	case []uint:
-		z.prepUint(len(xAsCase))
-	case []uint32:
-		z.prepUint32(len(xAsCase))
-	case []uint64:
-		z.prepUint64(len(xAsCase))
-	}
+	return z.bufUint64
 }
 
 func (z *zSorter) Sort(x interface{}) error {
-	z.prepBuffers(x)
 	switch xAsCase := x.(type) {
 	case []float32:
-		zfloat32.SortBYOB(xAsCase, z.bufFloat32[:len(xAsCase)])
+		if z.useGoSort && len(xAsCase) < zfloat32.MinSize {
+			goSortFloat32(xAsCase)
+		} else {
+			zfloat32.SortBYOB(xAsCase, z.prepFloat32(len(xAsCase)))
+		}
 	case []float64:
-		zfloat64.SortBYOB(xAsCase, z.bufFloat64[:len(xAsCase)])
+		if z.useGoSort && len(xAsCase) < zfloat64.MinSize {
+			sort.Float64s(xAsCase)
+		} else {
+			zfloat64.SortBYOB(xAsCase, z.prepFloat64(len(xAsCase)))
+		}
 	case []int:
-		zint.SortBYOB(xAsCase, z.bufInt[:len(xAsCase)])
+		if z.useGoSort && len(xAsCase) < zint.MinSize {
+			sort.Ints(xAsCase)
+		} else {
+			zint.SortBYOB(xAsCase, z.prepInt(len(xAsCase)))
+		}
 	case []int32:
-		zint32.SortBYOB(xAsCase, z.bufInt32[:len(xAsCase)])
+		if z.useGoSort && len(xAsCase) < zint32.MinSize {
+			goSortInt32(xAsCase)
+		} else {
+			zint32.SortBYOB(xAsCase, z.prepInt32(len(xAsCase)))
+		}
 	case []int64:
-		zint64.SortBYOB(xAsCase, z.bufInt64[:len(xAsCase)])
+		if z.useGoSort && len(xAsCase) < zint64.MinSize {
+			goSortInt64(xAsCase)
+		} else {
+			zint64.SortBYOB(xAsCase, z.prepInt64(len(xAsCase)))
+		}
+	case []uint:
+		if z.useGoSort && len(xAsCase) < zuint.MinSize {
+			goSortUint(xAsCase)
+		} else {
+			zuint.SortBYOB(xAsCase, z.prepUint(len(xAsCase)))
+		}
+	case []uint32:
+		if z.useGoSort && len(xAsCase) < zuint32.MinSize {
+			goSortUint32(xAsCase)
+		} else {
+			zuint32.SortBYOB(xAsCase, z.prepUint32(len(xAsCase)))
+		}
+	case []uint64:
+		if z.useGoSort && len(xAsCase) < zuint64.MinSize {
+			goSortUint64(xAsCase)
+		} else {
+			zuint64.SortBYOB(xAsCase, z.prepUint64(len(xAsCase)))
+		}
 	case []string:
 		sort.Strings(xAsCase)
-	case []uint:
-		zuint.SortBYOB(xAsCase, z.bufUint[:len(xAsCase)])
-	case []uint32:
-		zuint32.SortBYOB(xAsCase, z.bufUint32[:len(xAsCase)])
-	case []uint64:
-		zuint64.SortBYOB(xAsCase, z.bufUint64[:len(xAsCase)])
 	case sort.Interface:
 		sort.Sort(xAsCase)
 	default:
@@ -195,5 +214,10 @@ func makeCopy(x interface{}) interface{} {
 // New creates a Sorter that reuses buffers on repeated Sort() or CopySort() calls on the same type.
 // This is not thread safe. CopySort() does not support passthrough of sort.Interface values.
 func New() Sorter {
-	return new(zSorter)
+	return &zSorter{useGoSort: true}
+}
+
+// Same as New(), but will not uses go sort on small slices
+func newRawSorter() Sorter {
+	return &zSorter{useGoSort: false}
 }
