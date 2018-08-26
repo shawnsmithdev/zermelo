@@ -1,5 +1,5 @@
 // Package zermelo is a library for sorting slices in Go.
-package zermelo
+package zermelo // import "github.com/shawnsmithdev/zermelo"
 
 import (
 	"errors"
