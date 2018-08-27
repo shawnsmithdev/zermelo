@@ -57,7 +57,7 @@ func (z *zSorter) sortFloat32(x []float32) {
 	zfloat32.SortBYOB(x, z.bufFloat32)
 }
 
-func (z *zSorter) sortFloat64(x []float64)  {
+func (z *zSorter) sortFloat64(x []float64) {
 	size := len(x)
 	if z.useGoSort && size < zfloat64.MinSize {
 		sort.Float64s(x)
@@ -69,7 +69,7 @@ func (z *zSorter) sortFloat64(x []float64)  {
 	zfloat64.SortBYOB(x, z.bufFloat64)
 }
 
-func (z *zSorter) sortInt(x []int)  {
+func (z *zSorter) sortInt(x []int) {
 	size := len(x)
 	if z.useGoSort && size < zint.MinSize {
 		sort.Ints(x)
