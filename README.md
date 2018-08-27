@@ -82,14 +82,14 @@ The benchmark tests two types of slices:
 * `[]uint64`
 * `[]float64`
 
-For each of the tested types, it runs the benchmark a slice of that type with four sizes:
+For each of the tested types, it runs the benchmark on a slice of that type with four sizes:
 * `T` (tiny) 64
 * `S` (small) 256
 * `M` (medium) 1024
 * `L` (large) 1048576
 
-For each slice type and size, it bencharks three sorters:
-* GoSort - The standard library sort: `sort.Slice()`, `sort.Ints()`, or `sort.Float64s`
+For each slice type and size, three sorters are benchmarked:
+* GoSort - The standard library sort: `sort.Slice()` or `sort.Float64s`
 * ZSort - `zermelo.Sort()`, does not reuse buffers
 * ZSorter - `zermelo.New().Sort()`, does reuse buffers
 

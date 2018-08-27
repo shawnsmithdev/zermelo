@@ -13,9 +13,11 @@ import (
 	"sort"
 )
 
-// A Sorter can sort things like slices. Returns an error on unsupported types.
+// A Sorter can sort things like slices.
 type Sorter interface {
+	// Sort attempts to sort x, returning an error if unable to sort.
 	Sort(x interface{}) error
+	// CopySort returns a sorted copy of x, or an error if unable to copy or sort.
 	CopySort(x interface{}) (interface{}, error)
 }
 
@@ -43,112 +45,120 @@ func allocSize(bufCap, reqLen int) int {
 	return 5 * reqLen / 4
 }
 
-func (z *zSorter) prepFloat32(size int) []float32 {
-	if cap(z.bufFloat32) < size {
-		z.bufFloat32 = make([]float32, allocSize(cap(z.bufFloat32), size))
+func (z *zSorter) sortFloat32(x []float32) {
+	size := len(x)
+	if z.useGoSort && size < zfloat32.MinSize {
+		goSortFloat32(x)
+		return
 	}
-	return z.bufFloat32
+	if len(z.bufFloat32) < size {
+		z.bufFloat32 = make([]float32, allocSize(len(z.bufFloat32), size))
+	}
+	zfloat32.SortBYOB(x, z.bufFloat32)
 }
 
-func (z *zSorter) prepFloat64(size int) []float64 {
-	if cap(z.bufFloat64) < size {
-		z.bufFloat64 = make([]float64, allocSize(cap(z.bufFloat64), size))
+func (z *zSorter) sortFloat64(x []float64)  {
+	size := len(x)
+	if z.useGoSort && size < zfloat64.MinSize {
+		sort.Float64s(x)
+		return
 	}
-	return z.bufFloat64
+	if len(z.bufFloat64) < size {
+		z.bufFloat64 = make([]float64, allocSize(len(z.bufFloat64), size))
+	}
+	zfloat64.SortBYOB(x, z.bufFloat64)
 }
 
-func (z *zSorter) prepInt(size int) []int {
-	if cap(z.bufInt) < size {
-		z.bufInt = make([]int, allocSize(cap(z.bufInt), size))
+func (z *zSorter) sortInt(x []int)  {
+	size := len(x)
+	if z.useGoSort && size < zint.MinSize {
+		sort.Ints(x)
+		return
 	}
-	return z.bufInt
+	if len(z.bufInt) < size {
+		z.bufInt = make([]int, allocSize(len(z.bufInt), size))
+	}
+	zint.SortBYOB(x, z.bufInt)
 }
 
-func (z *zSorter) prepInt32(size int) []int32 {
-	if cap(z.bufInt32) < size {
-		z.bufInt32 = make([]int32, allocSize(cap(z.bufInt32), size))
+func (z *zSorter) sortInt32(x []int32) {
+	size := len(x)
+	if z.useGoSort && size < zint32.MinSize {
+		goSortInt32(x)
+		return
 	}
-	return z.bufInt32
+	if len(z.bufInt32) < size {
+		z.bufInt32 = make([]int32, allocSize(len(z.bufInt32), size))
+	}
+	zint32.SortBYOB(x, z.bufInt32)
 }
 
-func (z *zSorter) prepInt64(size int) []int64 {
-	if cap(z.bufInt64) < size {
-		z.bufInt64 = make([]int64, allocSize(cap(z.bufInt64), size))
+func (z *zSorter) sortInt64(x []int64) {
+	size := len(x)
+	if z.useGoSort && size < zint64.MinSize {
+		goSortInt64(x)
+		return
 	}
-	return z.bufInt64
+	if len(z.bufInt64) < size {
+		z.bufInt64 = make([]int64, allocSize(len(z.bufInt64), size))
+	}
+	zint64.SortBYOB(x, z.bufInt64)
 }
 
-func (z *zSorter) prepUint(size int) []uint {
-	if cap(z.bufUint) < size {
-		z.bufUint = make([]uint, allocSize(cap(z.bufUint), size))
+func (z *zSorter) sortUint(x []uint) {
+	size := len(x)
+	if z.useGoSort && size < zuint.MinSize {
+		goSortUint(x)
+		return
 	}
-	return z.bufUint
+	if len(z.bufUint) < size {
+		z.bufUint = make([]uint, allocSize(len(z.bufUint), size))
+	}
+	zuint.SortBYOB(x, z.bufUint)
 }
 
-func (z *zSorter) prepUint32(size int) []uint32 {
-	if cap(z.bufUint32) < size {
-		z.bufUint32 = make([]uint32, allocSize(cap(z.bufUint32), size))
+func (z *zSorter) sortUint32(x []uint32) {
+	size := len(x)
+	if z.useGoSort && size < zuint32.MinSize {
+		goSortUint32(x)
+		return
 	}
-	return z.bufUint32
+	if len(z.bufUint32) < size {
+		z.bufUint32 = make([]uint32, allocSize(len(z.bufUint32), size))
+	}
+	zuint32.SortBYOB(x, z.bufUint32)
 }
 
-func (z *zSorter) prepUint64(size int) []uint64 {
-	if cap(z.bufUint64) < size {
-		z.bufUint64 = make([]uint64, allocSize(cap(z.bufUint64), size))
+func (z *zSorter) sortUint64(x []uint64) {
+	size := len(x)
+	if z.useGoSort && size < zuint64.MinSize {
+		goSortUint64(x)
+		return
 	}
-	return z.bufUint64
+	if len(z.bufUint64) < size {
+		z.bufUint64 = make([]uint64, allocSize(len(z.bufUint64), size))
+	}
+	zuint64.SortBYOB(x, z.bufUint64)
 }
 
 func (z *zSorter) Sort(x interface{}) error {
 	switch xAsCase := x.(type) {
 	case []float32:
-		if z.useGoSort && len(xAsCase) < zfloat32.MinSize {
-			goSortFloat32(xAsCase)
-		} else {
-			zfloat32.SortBYOB(xAsCase, z.prepFloat32(len(xAsCase)))
-		}
+		z.sortFloat32(xAsCase)
 	case []float64:
-		if z.useGoSort && len(xAsCase) < zfloat64.MinSize {
-			sort.Float64s(xAsCase)
-		} else {
-			zfloat64.SortBYOB(xAsCase, z.prepFloat64(len(xAsCase)))
-		}
+		z.sortFloat64(xAsCase)
 	case []int:
-		if z.useGoSort && len(xAsCase) < zint.MinSize {
-			sort.Ints(xAsCase)
-		} else {
-			zint.SortBYOB(xAsCase, z.prepInt(len(xAsCase)))
-		}
+		z.sortInt(xAsCase)
 	case []int32:
-		if z.useGoSort && len(xAsCase) < zint32.MinSize {
-			goSortInt32(xAsCase)
-		} else {
-			zint32.SortBYOB(xAsCase, z.prepInt32(len(xAsCase)))
-		}
+		z.sortInt32(xAsCase)
 	case []int64:
-		if z.useGoSort && len(xAsCase) < zint64.MinSize {
-			goSortInt64(xAsCase)
-		} else {
-			zint64.SortBYOB(xAsCase, z.prepInt64(len(xAsCase)))
-		}
+		z.sortInt64(xAsCase)
 	case []uint:
-		if z.useGoSort && len(xAsCase) < zuint.MinSize {
-			goSortUint(xAsCase)
-		} else {
-			zuint.SortBYOB(xAsCase, z.prepUint(len(xAsCase)))
-		}
+		z.sortUint(xAsCase)
 	case []uint32:
-		if z.useGoSort && len(xAsCase) < zuint32.MinSize {
-			goSortUint32(xAsCase)
-		} else {
-			zuint32.SortBYOB(xAsCase, z.prepUint32(len(xAsCase)))
-		}
+		z.sortUint32(xAsCase)
 	case []uint64:
-		if z.useGoSort && len(xAsCase) < zuint64.MinSize {
-			goSortUint64(xAsCase)
-		} else {
-			zuint64.SortBYOB(xAsCase, z.prepUint64(len(xAsCase)))
-		}
+		z.sortUint64(xAsCase)
 	case []string:
 		sort.Strings(xAsCase)
 	case sort.Interface:
