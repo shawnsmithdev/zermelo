@@ -43,12 +43,11 @@ func SortBYOB(x, buffer []uint) {
 
 	from := x
 	to := buffer[:len(x)]
-	var key uint8       // Current byte value
-	var offset [256]int // Keep track of where room is made for byte groups in the buffer
+	var key uint8 // Current byte value
 
 	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
 		keyMask := uint(0xFF << keyOffset)
-		var counts [256]int // Keep track of the number of elements for each kind of byte
+		var offset [256]int // Keep track of where room is made for byte groups in the buffer
 		sorted := true
 		prev := uint(0)
 
@@ -56,7 +55,8 @@ func SortBYOB(x, buffer []uint) {
 			// For each elem to sort, fetch the byte at current radix
 			key = uint8((elem & keyMask) >> keyOffset)
 			// inc count of bytes of this type
-			counts[key]++
+			offset[key]++
+
 			if sorted { // Detect sorted
 				sorted = elem >= prev
 				prev = elem
@@ -70,10 +70,11 @@ func SortBYOB(x, buffer []uint) {
 			return
 		}
 
-		// Make room for each group of bytes by calculating offset of each
-		offset[0] = 0
-		for i := 1; i < len(offset); i++ {
-			offset[i] = offset[i-1] + counts[i-1]
+		// Find target bucket offsets
+		watermark := offset[0] - offset[0] // Like := 0, but inherits the type.
+		for i, count := range offset {
+			offset[i] = watermark
+			watermark += count
 		}
 
 		// Swap values between the buffers by radix
