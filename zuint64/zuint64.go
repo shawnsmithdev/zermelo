@@ -43,17 +43,14 @@ func SortBYOB(x, buffer []uint64) {
 	// Each pass processes a byte offset, copying back and forth between slices
 	from := x
 	to := buffer[:len(x)]
-	var key uint8
-	var offset [256]int // Keep track of where groups start
 
 	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
-		keyMask := uint64(0xFF << keyOffset) // Current 'digit' to look at
-		var counts [256]int                  // Keep track of the number of elements for each kind of byte
+		var offset [256]int                  // Keep track of where groups start
 		sorted := true                       // Check for already sorted
 		prev := uint64(0)                    // if elem is always >= prev it is already sorted
 		for _, elem := range from {
-			key = uint8((elem & keyMask) >> keyOffset) // fetch the byte at current 'digit'
-			counts[key]++                              // count of elems to put in this digit's bucket
+			key := uint8(elem >> keyOffset) // fetch the byte at current 'digit'
+			offset[key]++                              // count of elems to put in this digit's bucket
 
 			if sorted { // Detect sorted
 				sorted = elem >= prev
@@ -69,14 +66,15 @@ func SortBYOB(x, buffer []uint64) {
 		}
 
 		// Find target bucket offsets
-		offset[0] = 0
-		for i := 1; i < len(offset); i++ {
-			offset[i] = offset[i-1] + counts[i-1]
+		watermark := offset[0] - offset[0] // Like := 0, but inherits the type.
+		for i, count := range offset {
+			offset[i] = watermark
+			watermark += count
 		}
 
 		// Rebucket while copying to other buffer
 		for _, elem := range from {
-			key = uint8((elem & keyMask) >> keyOffset) // Get the digit
+			key := uint8(elem >> keyOffset) // Get the digit
 			to[offset[key]] = elem                     // Copy the element to the digit's bucket
 			offset[key]++                              // One less space, move the offset
 		}
