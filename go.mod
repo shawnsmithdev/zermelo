@@ -1,3 +1,3 @@
 module github.com/shawnsmithdev/zermelo
 
-go 1.8
+go 1.10
