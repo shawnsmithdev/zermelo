@@ -55,18 +55,17 @@ func SortBYOB(x, buffer []float32) {
 	to := buffer[:len(from)]
 	var key uint8
 	var uintVal uint32
-	var offset [256]int // Keep track of where room is made for byte groups in the buffer
 
 	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
 		keyMask := uint32(0xFF << keyOffset) // Current 'digit' to look at
-		var counts [256]int                  // Keep track of the number of elements for each kind of byte
+		var offset [256]int                  // Keep track of where room is made for byte groups in the buffer
 		sorted := true                       // Check for already sorted
 		prev := float32(0)                   // if elem is always >= prev it is already sorted
 
 		for _, val := range from {
 			uintVal = floatFlip(math.Float32bits(val))
 			key = uint8((uintVal & keyMask) >> keyOffset) // fetch the byte at current 'digit'
-			counts[key]++                                 // count of values to put in this digit's bucket
+			offset[key]++                                 // count of values to put in this digit's bucket
 
 			if sorted { // Detect sorted
 				sorted = val >= prev
@@ -82,9 +81,10 @@ func SortBYOB(x, buffer []float32) {
 		}
 
 		// Find target bucket offsets
-		offset[0] = 0
-		for i := 1; i < len(offset); i++ {
-			offset[i] = offset[i-1] + counts[i-1]
+		watermark := 0
+		for i, count := range offset {
+			offset[i] = watermark
+			watermark += count
 		}
 
 		// Rebucket while copying to other buffer
@@ -94,8 +94,9 @@ func SortBYOB(x, buffer []float32) {
 			to[offset[key]] = val                         // Copy the element to the digit's bucket
 			offset[key]++                                 // One less space, move the offset
 		}
-		// On next pass copy data the other way
-		to, from = from, to
+
+		// Reverse buffers on each pass
+		from, to = to, from
 	}
 }
 
@@ -106,9 +107,3 @@ func floatFlip(x uint32) uint32 {
 	}
 	return x ^ 0x80000000
 }
-
-type float32Sortable []float32
-
-func (r float32Sortable) Len() int           { return len(r) }
-func (r float32Sortable) Less(i, j int) bool { return r[i] < r[j] }
-func (r float32Sortable) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }

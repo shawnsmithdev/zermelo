@@ -44,11 +44,10 @@ func SortBYOB(x, buffer []int64) {
 	from := x
 	to := buffer[:len(x)]
 	var key uint8
-	var offset [256]int // Keep track of where groups start
 
 	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
 		keyMask := int64(0xFF << keyOffset)
-		var counts [256]int // Keep track of the number of elements for each kind of byte
+		var offset [256]int // Keep track of where room is made for byte groups in the buffer
 		sorted := true
 		prev := minInt64
 
@@ -56,7 +55,7 @@ func SortBYOB(x, buffer []int64) {
 			// For each elem to sort, fetch the byte at current radix
 			key = uint8((elem & keyMask) >> keyOffset)
 			// inc count of bytes of this type
-			counts[key]++
+			offset[key]++
 			if sorted { // Detect sorted
 				sorted = elem >= prev
 				prev = elem
@@ -70,26 +69,26 @@ func SortBYOB(x, buffer []int64) {
 			return
 		}
 
+		// Find target bucket offsets
+		watermark := 0
 		if keyOffset == bitSize-radix {
 			// Handle signed values
-			// Count negative elements (last 128 counts)
-			negCnt := 0
-			for i := 128; i < 256; i++ {
-				negCnt += counts[i]
+			// Negatives
+			for i := 128; i < len(offset); i++ {
+				count := offset[i]
+				offset[i] = watermark
+				watermark += count
 			}
-
-			offset[0] = negCnt // Start of positives
-			offset[128] = 0    // Start of negatives
-			for i := 1; i < 128; i++ {
-				// Positive values
-				offset[i] = offset[i-1] + counts[i-1]
-				// Negative values
-				offset[i+128] = offset[i+127] + counts[i+127]
+			// Positives
+			for i := 0; i < 128; i++ {
+				count := offset[i]
+				offset[i] = watermark
+				watermark += count
 			}
 		} else {
-			offset[0] = 0
-			for i := 1; i < len(offset); i++ {
-				offset[i] = offset[i-1] + counts[i-1]
+			for i, count := range offset {
+				offset[i] = watermark
+				watermark += count
 			}
 		}
 
@@ -99,6 +98,8 @@ func SortBYOB(x, buffer []int64) {
 			to[offset[key]] = elem                     // Copy the element depending on byte offsets
 			offset[key]++
 		}
+
+		// Reverse buffers on each pass
 		from, to = to, from
 	}
 }

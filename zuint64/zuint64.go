@@ -45,12 +45,12 @@ func SortBYOB(x, buffer []uint64) {
 	to := buffer[:len(x)]
 
 	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
-		var offset [256]int                  // Keep track of where groups start
-		sorted := true                       // Check for already sorted
-		prev := uint64(0)                    // if elem is always >= prev it is already sorted
+		var offset [256]int // Keep track of where room is made for byte groups in the buffer
+		sorted := true      // Check for already sorted
+		prev := uint64(0)   // if elem is always >= prev it is already sorted
 		for _, elem := range from {
 			key := uint8(elem >> keyOffset) // fetch the byte at current 'digit'
-			offset[key]++                              // count of elems to put in this digit's bucket
+			offset[key]++                   // count of elems to put in this digit's bucket
 
 			if sorted { // Detect sorted
 				sorted = elem >= prev
@@ -66,7 +66,7 @@ func SortBYOB(x, buffer []uint64) {
 		}
 
 		// Find target bucket offsets
-		watermark := offset[0] - offset[0] // Like := 0, but inherits the type.
+		watermark := 0
 		for i, count := range offset {
 			offset[i] = watermark
 			watermark += count
@@ -75,10 +75,11 @@ func SortBYOB(x, buffer []uint64) {
 		// Rebucket while copying to other buffer
 		for _, elem := range from {
 			key := uint8(elem >> keyOffset) // Get the digit
-			to[offset[key]] = elem                     // Copy the element to the digit's bucket
-			offset[key]++                              // One less space, move the offset
+			to[offset[key]] = elem          // Copy the element to the digit's bucket
+			offset[key]++                   // One less space, move the offset
 		}
-		// On next pass copy data the other way
-		to, from = from, to
+
+		// Reverse buffers on each pass
+		from, to = to, from
 	}
 }

@@ -69,7 +69,7 @@ func SortBYOB(x, buffer []uint) {
 		}
 
 		// Find target bucket offsets
-		watermark := offset[0] - offset[0] // Like := 0, but inherits the type.
+		watermark := 0
 		for i, count := range offset {
 			offset[i] = watermark
 			watermark += count
@@ -81,6 +81,8 @@ func SortBYOB(x, buffer []uint) {
 			to[offset[key]] = elem          // Copy the element depending on byte offsets
 			offset[key]++                   // One less space, move the offset
 		}
-		to, from = from, to
+
+		// Reverse buffers on each pass
+		from, to = to, from
 	}
 }
