@@ -296,7 +296,7 @@ func genTestDataInt64(x []int64) {
 	var isNeg bool
 	for i := range x {
 		tmp = rand.Int63()
-		isNeg = 1 == (1 & rand.Uint32())
+		isNeg = (1 & rand.Uint32()) == 1
 		if isNeg {
 			x[i] = 0 - tmp
 		} else {

@@ -57,15 +57,14 @@ func SortBYOB(x, buffer []float64) {
 	var uintVal uint64
 
 	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
-		keyMask := uint64(0xFF << keyOffset) // Current 'digit' to look at
-		var offset [256]int                  // Keep track of where room is made for byte groups in the buffer
-		sorted := true                       // Check for already sorted
-		prev := float64(0)                   // if elem is always >= prev it is already sorted
+		var offset [256]int // Keep track of where room is made for byte groups in the buffer
+		sorted := true      // Check for already sorted
+		prev := float64(0)  // if elem is always >= prev it is already sorted
 
 		for _, val := range from {
 			uintVal = floatFlip(math.Float64bits(val))
-			key = uint8((uintVal & keyMask) >> keyOffset) // fetch the byte at current 'digit'
-			offset[key]++                                 // count of values to put in this digit's bucket
+			key = uint8(uintVal >> keyOffset) // fetch the byte at current 'digit'
+			offset[key]++                     // count of values to put in this digit's bucket
 
 			if sorted { // Detect sorted
 				sorted = val >= prev
@@ -90,9 +89,9 @@ func SortBYOB(x, buffer []float64) {
 		// Rebucket while copying to other buffer
 		for _, val := range from {
 			uintVal = floatFlip(math.Float64bits(val))
-			key = uint8((uintVal & keyMask) >> keyOffset) // Get the digit
-			to[offset[key]] = val                         // Copy the element to the digit's bucket
-			offset[key]++                                 // One less space, move the offset
+			key = uint8(uintVal >> keyOffset) // Get the digit
+			to[offset[key]] = val             // Copy the element to the digit's bucket
+			offset[key]++                     // One less space, move the offset
 		}
 
 		// Reverse buffers on each pass
@@ -100,7 +99,7 @@ func SortBYOB(x, buffer []float64) {
 	}
 }
 
-// Converts a uint64 that represents a true float to one sorts properly
+// Converts a uint64 that represents a true float to one that sorts properly
 func floatFlip(x uint64) uint64 {
 	if (x & 0x8000000000000000) == 0x8000000000000000 {
 		return x ^ 0xFFFFFFFFFFFFFFFF

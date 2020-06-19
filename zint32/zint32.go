@@ -2,15 +2,15 @@
 package zint32
 
 import (
+	"math"
 	"sort"
 )
 
 const (
 	// MinSize is the minimum size of a slice that will be radix sorted by Sort.
-	MinSize        = 128
-	radix    uint  = 8
-	bitSize  uint  = 32
-	minInt32 int32 = -1 << 31
+	MinSize      = 128
+	radix   uint = 8
+	bitSize uint = 32
 )
 
 // Sort sorts x using a Radix sort (Small slices are sorted with sort.Sort() instead).
@@ -46,13 +46,12 @@ func SortBYOB(x, buffer []int32) {
 	var key uint8
 
 	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
-		keyMask := int32(0xFF << keyOffset)
 		sorted := true
-		prev := minInt32
+		var prev int32 = math.MinInt32
 		var offset [256]int // Keep track of where room is made for byte groups in the buffer
 		for _, elem := range from {
 			// For each elem to sort, fetch the byte at current radix
-			key = uint8((elem & keyMask) >> keyOffset)
+			key = uint8(elem >> keyOffset)
 			// inc count of bytes of this type
 			offset[key]++
 			if sorted { // Detect sorted
@@ -93,8 +92,8 @@ func SortBYOB(x, buffer []int32) {
 
 		// Swap values between the buffers by radix
 		for _, elem := range from {
-			key = uint8((elem & keyMask) >> keyOffset) // Get the byte of each element at the radix
-			to[offset[key]] = elem                     // Copy the element depending on byte offsets
+			key = uint8(elem >> keyOffset) // Get the byte of each element at the radix
+			to[offset[key]] = elem         // Copy the element depending on byte offsets
 			offset[key]++
 		}
 

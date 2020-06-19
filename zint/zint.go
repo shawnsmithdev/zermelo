@@ -47,13 +47,12 @@ func SortBYOB(x, buffer []int) {
 	var key uint8 // Current byte value
 
 	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
-		keyMask := 0xFF << keyOffset
 		var offset [256]int // Keep track of the number of elements for each kind of byte
 		sorted := true
 		prev := minInt
 		for _, elem := range from {
 			// For each elem to sort, fetch the byte at current radix
-			key = uint8((elem & keyMask) >> keyOffset)
+			key = uint8(elem >> keyOffset)
 			// inc count of bytes of this type
 			offset[key]++
 			if sorted { // Detect sorted
@@ -94,8 +93,8 @@ func SortBYOB(x, buffer []int) {
 
 		// Swap values between the buffers by radix
 		for _, elem := range from {
-			key = uint8((elem & keyMask) >> keyOffset) // Get the byte of each element at the radix
-			to[offset[key]] = elem                     // Copy the element depending on byte offsets
+			key = uint8(elem >> keyOffset) // Get the byte of each element at the radix
+			to[offset[key]] = elem         // Copy the element depending on byte offsets
 			offset[key]++
 		}
 
