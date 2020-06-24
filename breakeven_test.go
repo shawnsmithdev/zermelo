@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// These test makes sure that the MinSize before using sort.Sort() is large enough.
+// These test makes sure that the MinSize before using sort.Sort() is roughly large enough.
 
 const breakEvenStartSize = 4
 
@@ -91,7 +91,7 @@ func TestBreakEvenUint64Reversed(t *testing.T) {
 func breakEvenTest(g, r interface{}, minSize uint, t *testing.T, genFunc func(interface{})) uint {
 	gsort := goSorter
 	zsort := newRawSorter().Sort
-	for size := uint(breakEvenStartSize); size < minSize; size++ {
+	for size := uint(breakEvenStartSize); size < (2 * minSize); size++ {
 		var retry uint
 		max := uint(65)
 		for retry = 0; retry < max; retry++ {
