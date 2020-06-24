@@ -1,4 +1,8 @@
 language: go
+arch:
+  - amd64
+  - arm64
+os: linux
 sudo: false
 
 go:
