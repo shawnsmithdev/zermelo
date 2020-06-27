@@ -3,7 +3,7 @@ arch:
   - amd64
   - arm64
 os: linux
-sudo: false
+dist: bionic
 
 go:
   - "1.10"
