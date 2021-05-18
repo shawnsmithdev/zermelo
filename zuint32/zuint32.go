@@ -45,7 +45,7 @@ func SortBYOB(x, buffer []uint32) {
 
 	for keyOffset := uint(0); keyOffset < bitSize; keyOffset += radix {
 		var offset [256]int // Keep track of where room is made for byte groups in the buffer
-		sorted := false
+		sorted := true
 		prev := uint32(0)
 
 		for _, elem := range from {
