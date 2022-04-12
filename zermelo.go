@@ -3,14 +3,6 @@ package zermelo // import "github.com/shawnsmithdev/zermelo"
 
 import (
 	"errors"
-	"github.com/shawnsmithdev/zermelo/zfloat32"
-	"github.com/shawnsmithdev/zermelo/zfloat64"
-	"github.com/shawnsmithdev/zermelo/zint"
-	"github.com/shawnsmithdev/zermelo/zint32"
-	"github.com/shawnsmithdev/zermelo/zint64"
-	"github.com/shawnsmithdev/zermelo/zuint"
-	"github.com/shawnsmithdev/zermelo/zuint32"
-	"github.com/shawnsmithdev/zermelo/zuint64"
 	"sort"
 )
 
@@ -19,24 +11,34 @@ import (
 // If x is a supported slice type, this library will be used to sort it. Otherwise,
 // if x implements sort.Interface it will passthrough to the sort.Sort() algorithm.
 // Returns an error on unsupported types.
-func Sort(x interface{}) error {
+func Sort(x any) error {
 	switch xAsCase := x.(type) {
 	case []float32:
-		zfloat32.Sort(xAsCase)
+		SortFloats(xAsCase)
 	case []float64:
-		zfloat64.Sort(xAsCase)
+		SortFloats(xAsCase)
 	case []int:
-		zint.Sort(xAsCase)
+		SortIntegers(xAsCase)
+	case []int8:
+		SortIntegers(xAsCase)
+	case []int16:
+		SortIntegers(xAsCase)
 	case []int32:
-		zint32.Sort(xAsCase)
+		SortIntegers(xAsCase)
 	case []int64:
-		zint64.Sort(xAsCase)
+		SortIntegers(xAsCase)
 	case []uint:
-		zuint.Sort(xAsCase)
+		SortIntegers(xAsCase)
+	case []uint8:
+		SortIntegers(xAsCase)
+	case []uint16:
+		SortIntegers(xAsCase)
 	case []uint32:
-		zuint32.Sort(xAsCase)
+		SortIntegers(xAsCase)
 	case []uint64:
-		zuint64.Sort(xAsCase)
+		SortIntegers(xAsCase)
+	case []uintptr:
+		SortIntegers(xAsCase)
 	case []string:
 		sort.Strings(xAsCase)
 	case sort.Interface:

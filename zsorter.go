@@ -2,37 +2,157 @@ package zermelo
 
 import (
 	"errors"
-	"github.com/shawnsmithdev/zermelo/zfloat32"
-	"github.com/shawnsmithdev/zermelo/zfloat64"
-	"github.com/shawnsmithdev/zermelo/zint"
-	"github.com/shawnsmithdev/zermelo/zint32"
-	"github.com/shawnsmithdev/zermelo/zint64"
-	"github.com/shawnsmithdev/zermelo/zuint"
-	"github.com/shawnsmithdev/zermelo/zuint32"
-	"github.com/shawnsmithdev/zermelo/zuint64"
-	"sort"
+	"golang.org/x/exp/constraints"
+	"golang.org/x/exp/slices"
 )
 
-// A Sorter can sort things like slices.
+// Sorter can sort slices
 type Sorter interface {
 	// Sort attempts to sort x, returning an error if unable to sort.
-	Sort(x interface{}) error
+	Sort(x any) error
 	// CopySort returns a sorted copy of x, or an error if unable to copy or sort.
-	CopySort(x interface{}) (interface{}, error)
+	CopySort(x any) (interface{}, error)
 }
 
-// Reuseable buffers
+// New creates a Sorter that reuses buffers on repeated Sort() or CopySort() calls on the same type.
+// This is not thread safe. CopySort() does not support passthrough of sort.Interface values.
+// This style of sorter is deprecated, use NewIntSorter/NewFloatSorter
+func New() Sorter {
+	return &zSorter{}
+}
+
 type zSorter struct {
-	bufFloat32 []float32
-	bufFloat64 []float64
-	bufInt     []int
-	bufInt32   []int32
-	bufInt64   []int64
-	bufUint    []uint
-	bufUint32  []uint32
-	bufUint64  []uint64
-	// if true, use go stdlib sort on small slices
-	useGoSort bool
+	ints     IntSorter[int]
+	int64s   IntSorter[int64]
+	int32s   IntSorter[int32]
+	int16s   IntSorter[int16]
+	int8s    IntSorter[int8]
+	uints    IntSorter[uint]
+	uintptrs IntSorter[uintptr]
+	uint64s  IntSorter[uint64]
+	uint32s  IntSorter[uint32]
+	uint16s  IntSorter[uint16]
+	uint8s   IntSorter[uint8]
+	float64s FloatSorter[float64]
+	float32s FloatSorter[float32]
+}
+
+func maybeIntSort[I constraints.Integer](x []I, sorter IntSorter[I]) (IntSorter[I], bool) {
+	if sorter == nil {
+		result := NewIntSorter[I]()
+		result.Sort(x)
+		return result, true
+	}
+	sorter.Sort(x)
+	return sorter, false
+}
+
+func maybeFloatSort[F constraints.Float](x []F, sorter FloatSorter[F]) (FloatSorter[F], bool) {
+	if sorter == nil {
+		result := NewFloatSorter[F]()
+		result.Sort(x)
+		return result, true
+	}
+	sorter.Sort(x)
+	return sorter, false
+}
+
+func (z *zSorter) Sort(x any) error {
+	switch xAsCase := x.(type) {
+	case []int:
+		if newSorter, isNew := maybeIntSort[int](xAsCase, z.ints); isNew {
+			z.ints = newSorter
+		}
+	case []int64:
+		if newSorter, isNew := maybeIntSort[int64](xAsCase, z.int64s); isNew {
+			z.int64s = newSorter
+		}
+	case []int32:
+		if newSorter, isNew := maybeIntSort[int32](xAsCase, z.int32s); isNew {
+			z.int32s = newSorter
+		}
+	case []int16:
+		if newSorter, isNew := maybeIntSort[int16](xAsCase, z.int16s); isNew {
+			z.int16s = newSorter
+		}
+	case []int8:
+		if newSorter, isNew := maybeIntSort[int8](xAsCase, z.int8s); isNew {
+			z.int8s = newSorter
+		}
+	case []uint:
+		if newSorter, isNew := maybeIntSort[uint](xAsCase, z.uints); isNew {
+			z.uints = newSorter
+		}
+	case []uintptr:
+		if newSorter, isNew := maybeIntSort[uintptr](xAsCase, z.uintptrs); isNew {
+			z.uintptrs = newSorter
+		}
+	case []uint64:
+		if newSorter, isNew := maybeIntSort[uint64](xAsCase, z.uint64s); isNew {
+			z.uint64s = newSorter
+		}
+	case []uint32:
+		if newSorter, isNew := maybeIntSort[uint32](xAsCase, z.uint32s); isNew {
+			z.uint32s = newSorter
+		}
+	case []uint16:
+		if newSorter, isNew := maybeIntSort[uint16](xAsCase, z.uint16s); isNew {
+			z.uint16s = newSorter
+		}
+	case []uint8:
+		if newSorter, isNew := maybeIntSort[uint8](xAsCase, z.uint8s); isNew {
+			z.uint8s = newSorter
+		}
+	case []float32:
+		if newSorter, isNew := maybeFloatSort[float32](xAsCase, z.float32s); isNew {
+			z.float32s = newSorter
+		}
+	case []float64:
+		if newSorter, isNew := maybeFloatSort[float64](xAsCase, z.float64s); isNew {
+			z.float64s = newSorter
+		}
+	default:
+		return errors.New("unsupported type")
+	}
+	return nil
+}
+
+func maybeCopySort[T any](z *zSorter, x []T) ([]T, error) {
+	sorted := slices.Clone(x)
+	return sorted, z.Sort(sorted)
+}
+
+func (z *zSorter) CopySort(x any) (any, error) {
+	switch xAsCase := x.(type) {
+	case []int:
+		return maybeCopySort[int](z, xAsCase)
+	case []int64:
+		return maybeCopySort[int64](z, xAsCase)
+	case []int32:
+		return maybeCopySort[int32](z, xAsCase)
+	case []int16:
+		return maybeCopySort[int16](z, xAsCase)
+	case []int8:
+		return maybeCopySort[int8](z, xAsCase)
+	case []uint:
+		return maybeCopySort[uint](z, xAsCase)
+	case []uintptr:
+		return maybeCopySort[uintptr](z, xAsCase)
+	case []uint64:
+		return maybeCopySort[uint64](z, xAsCase)
+	case []uint32:
+		return maybeCopySort[uint32](z, xAsCase)
+	case []uint16:
+		return maybeCopySort[uint16](z, xAsCase)
+	case []uint8:
+		return maybeCopySort[uint8](z, xAsCase)
+	case []float32:
+		return maybeCopySort[float32](z, xAsCase)
+	case []float64:
+		return maybeCopySort[float64](z, xAsCase)
+	default:
+		return nil, errors.New("unsupported type")
+	}
 }
 
 // Given an existing buffer capacity and a requested one, finds a new buffer size.
@@ -43,191 +163,4 @@ func allocSize(bufCap, reqLen int) int {
 		return reqLen
 	}
 	return 5 * reqLen / 4
-}
-
-func (z *zSorter) sortFloat32(x []float32) {
-	size := len(x)
-	if z.useGoSort && size < zfloat32.MinSize {
-		goSortFloat32(x)
-		return
-	}
-	if len(z.bufFloat32) < size {
-		z.bufFloat32 = make([]float32, allocSize(len(z.bufFloat32), size))
-	}
-	zfloat32.SortBYOB(x, z.bufFloat32)
-}
-
-func (z *zSorter) sortFloat64(x []float64) {
-	size := len(x)
-	if z.useGoSort && size < zfloat64.MinSize {
-		sort.Float64s(x)
-		return
-	}
-	if len(z.bufFloat64) < size {
-		z.bufFloat64 = make([]float64, allocSize(len(z.bufFloat64), size))
-	}
-	zfloat64.SortBYOB(x, z.bufFloat64)
-}
-
-func (z *zSorter) sortInt(x []int) {
-	size := len(x)
-	if z.useGoSort && size < zint.MinSize {
-		sort.Ints(x)
-		return
-	}
-	if len(z.bufInt) < size {
-		z.bufInt = make([]int, allocSize(len(z.bufInt), size))
-	}
-	zint.SortBYOB(x, z.bufInt)
-}
-
-func (z *zSorter) sortInt32(x []int32) {
-	size := len(x)
-	if z.useGoSort && size < zint32.MinSize {
-		goSortInt32(x)
-		return
-	}
-	if len(z.bufInt32) < size {
-		z.bufInt32 = make([]int32, allocSize(len(z.bufInt32), size))
-	}
-	zint32.SortBYOB(x, z.bufInt32)
-}
-
-func (z *zSorter) sortInt64(x []int64) {
-	size := len(x)
-	if z.useGoSort && size < zint64.MinSize {
-		goSortInt64(x)
-		return
-	}
-	if len(z.bufInt64) < size {
-		z.bufInt64 = make([]int64, allocSize(len(z.bufInt64), size))
-	}
-	zint64.SortBYOB(x, z.bufInt64)
-}
-
-func (z *zSorter) sortUint(x []uint) {
-	size := len(x)
-	if z.useGoSort && size < zuint.MinSize {
-		goSortUint(x)
-		return
-	}
-	if len(z.bufUint) < size {
-		z.bufUint = make([]uint, allocSize(len(z.bufUint), size))
-	}
-	zuint.SortBYOB(x, z.bufUint)
-}
-
-func (z *zSorter) sortUint32(x []uint32) {
-	size := len(x)
-	if z.useGoSort && size < zuint32.MinSize {
-		goSortUint32(x)
-		return
-	}
-	if len(z.bufUint32) < size {
-		z.bufUint32 = make([]uint32, allocSize(len(z.bufUint32), size))
-	}
-	zuint32.SortBYOB(x, z.bufUint32)
-}
-
-func (z *zSorter) sortUint64(x []uint64) {
-	size := len(x)
-	if z.useGoSort && size < zuint64.MinSize {
-		goSortUint64(x)
-		return
-	}
-	if len(z.bufUint64) < size {
-		z.bufUint64 = make([]uint64, allocSize(len(z.bufUint64), size))
-	}
-	zuint64.SortBYOB(x, z.bufUint64)
-}
-
-func (z *zSorter) Sort(x interface{}) error {
-	switch xAsCase := x.(type) {
-	case []float32:
-		z.sortFloat32(xAsCase)
-	case []float64:
-		z.sortFloat64(xAsCase)
-	case []int:
-		z.sortInt(xAsCase)
-	case []int32:
-		z.sortInt32(xAsCase)
-	case []int64:
-		z.sortInt64(xAsCase)
-	case []uint:
-		z.sortUint(xAsCase)
-	case []uint32:
-		z.sortUint32(xAsCase)
-	case []uint64:
-		z.sortUint64(xAsCase)
-	case []string:
-		sort.Strings(xAsCase)
-	case sort.Interface:
-		sort.Sort(xAsCase)
-	default:
-		return errors.New("type not supported")
-	}
-	return nil
-}
-
-func (z *zSorter) CopySort(x interface{}) (interface{}, error) {
-	y := makeCopy(x)
-	if y == nil {
-		return x, errors.New("type not supported")
-	}
-	err := z.Sort(y)
-	return y, err
-}
-
-func makeCopy(x interface{}) interface{} {
-	switch xAsCase := x.(type) {
-	case []float32:
-		y := make([]float32, len(xAsCase))
-		copy(y, xAsCase)
-		return y
-	case []float64:
-		y := make([]float64, len(xAsCase))
-		copy(y, xAsCase)
-		return y
-	case []int:
-		y := make([]int, len(xAsCase))
-		copy(y, xAsCase)
-		return y
-	case []int32:
-		y := make([]int32, len(xAsCase))
-		copy(y, xAsCase)
-		return y
-	case []int64:
-		y := make([]int64, len(xAsCase))
-		copy(y, xAsCase)
-		return y
-	case []string:
-		y := make([]string, len(xAsCase))
-		copy(y, xAsCase)
-		return y
-	case []uint:
-		y := make([]uint, len(xAsCase))
-		copy(y, xAsCase)
-		return y
-	case []uint32:
-		y := make([]uint32, len(xAsCase))
-		copy(y, xAsCase)
-		return y
-	case []uint64:
-		y := make([]uint64, len(xAsCase))
-		copy(y, xAsCase)
-		return y
-	default:
-		return nil
-	}
-}
-
-// New creates a Sorter that reuses buffers on repeated Sort() or CopySort() calls on the same type.
-// This is not thread safe. CopySort() does not support passthrough of sort.Interface values.
-func New() Sorter {
-	return &zSorter{useGoSort: true}
-}
-
-// Same as New(), but will not uses go sort on small slices
-func newRawSorter() Sorter {
-	return &zSorter{useGoSort: false}
 }

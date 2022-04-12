@@ -22,4 +22,4 @@ count.out
 *.exe
 *.test
 .idea/
-
+go.sum
