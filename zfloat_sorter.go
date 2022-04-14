@@ -6,7 +6,9 @@ import (
 	"math"
 )
 
+// FloatSorter describes types that can sort float slices
 type FloatSorter[F constraints.Float] interface {
+	// Sort sorts float slices
 	Sort(x []F)
 }
 
@@ -27,6 +29,10 @@ func (z *zFloatSorter[F, U]) Sort(x []F) {
 	unsafeFlipSortFlip[F, []F, U](x, z.buf, z.size)
 }
 
+// NewFloatSorter creates a new FloatSorter that will use radix sort on large slices and reuses buffers.
+// The first sort creates a buffer the same size as the slice being sorted and keeps it for future use.
+// Later sorts may grow this buffer as needed. The FloatSorter returned is not thread safe.
+// Using this sorter can be much faster than repeat calls to SortFloats.
 func NewFloatSorter[F constraints.Float]() FloatSorter[F] {
 	if isFloat32[F]() {
 		return &zFloatSorter[F, uint32]{

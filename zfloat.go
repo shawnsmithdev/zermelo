@@ -12,6 +12,7 @@ const (
 	compSortCutoffFloat64 = 384
 )
 
+// SortFloats sorts float slices. If the slice is large enough, radix sort is used by allocating a new buffer.
 func SortFloats[F constraints.Float](x []F) {
 	if len(x) < 2 {
 		return
@@ -24,6 +25,8 @@ func SortFloats[F constraints.Float](x []F) {
 	sortFloatsBYOB(x, make([]F, len(x)), is32)
 }
 
+// SortFloatsBYOB sorts float slices. If the slice is large enough, radix sort is used with the provided buffer.
+// len(buf) must be greater or equal to len(x).
 func SortFloatsBYOB[F constraints.Float](x, buf []F) {
 	sortFloatsBYOB(x, buf, isFloat32[F]())
 }
