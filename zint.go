@@ -12,6 +12,7 @@ const (
 	compSortCutoff        = 128
 )
 
+// SortIntegers sorts integer slices. If the slice is large enough, radix sort is used by allocating a new buffer.
 func SortIntegers[T constraints.Integer](x []T) {
 	if len(x) < 2 {
 		return
@@ -24,6 +25,8 @@ func SortIntegers[T constraints.Integer](x []T) {
 	sortIntegersBYOB(x, make([]T, len(x)), size, minval)
 }
 
+// SortIntegersBYOB sorts integer slices with radix sort using the provided buffer.
+// len(buf) must be greater or equal to len(x).
 func SortIntegersBYOB[T constraints.Integer](x, buffer []T) {
 	size, minval := detect[T]()
 	sortIntegersBYOB(x, buffer, size, minval)

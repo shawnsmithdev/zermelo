@@ -104,10 +104,10 @@ func testOldSorter[T constraints.Ordered](t *testing.T, rgen func() T) {
 
 func testIntSorters[I constraints.Integer](t *testing.T, rgen func() I) {
 	var toTest []I
-	testSorter := NewIntSorter[I]()
+	testSorter := newIntSorter[I]()
 
 	// prevent comparison sort cutoff for testing
-	testSorter.(*zIntSorter[I]).compSortCutoff = 0
+	testSorter.setCutoff(0)
 
 	var attempts int
 	for size := 3; size < testGiveUpRace; size++ {
@@ -157,15 +157,9 @@ func testIntSort[T constraints.Integer](t *testing.T, toTest []T, zsort IntSorte
 
 func testFloatSorters[F constraints.Float](t *testing.T, rgen func() F) {
 	var toTest []F
-	testSorter := NewFloatSorter[F]()
-
+	testSorter := newFloatSorter[F]()
 	// prevent comparison sort cutoff for testing
-	is32 := isFloat32[F]()
-	if is32 {
-		testSorter.(*zFloatSorter[F, uint32]).compSortCutoff = 0
-	} else {
-		testSorter.(*zFloatSorter[F, uint64]).compSortCutoff = 0
-	}
+	testSorter.setCutoff(0)
 
 	for size := 0; size < testGiveUpRace; size++ {
 		toTest = make([]F, size)
@@ -215,4 +209,36 @@ func testFloatSorter[T constraints.Float](t *testing.T, toTest []T, zsort FloatS
 		t.Fatal(control, toTest)
 	}
 	return zdelta < gdelta
+}
+
+func fillSlice[T any](x []T, gen func() T) {
+	for i := range x {
+		x[i] = gen()
+	}
+}
+
+func TestDetect(t *testing.T) {
+	testDetect[uint](t, bitSize, 0)
+	testDetect[uint8](t, 8, 0)
+	testDetect[uint16](t, 16, 0)
+	testDetect[uint32](t, 32, 0)
+	testDetect[uint64](t, 64, 0)
+	testDetect[int](t, bitSize, math.MinInt)
+	testDetect[int8](t, 8, math.MinInt8)
+	testDetect[int16](t, 16, math.MinInt16)
+	testDetect[int32](t, 32, math.MinInt32)
+	testDetect[int64](t, 64, math.MinInt64)
+}
+
+func testDetect[I constraints.Integer](t *testing.T, size uint, min I) {
+	start := time.Now()
+	detectedSize, detectedMin := detect[I]()
+	delta := time.Now().Sub(start)
+	if size != detectedSize {
+		t.Fatalf("%T: Wrong size, expected %v, got %v", I(0), size, detectedSize)
+	}
+	if detectedMin != min {
+		t.Fatalf("%T: Wrong min, expected %v, got %v", I(0), min, detectedMin)
+	}
+	t.Logf("%T: detect in %v", I(0), delta)
 }
