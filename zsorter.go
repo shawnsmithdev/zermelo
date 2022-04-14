@@ -154,13 +154,3 @@ func (z *zSorter) CopySort(x any) (any, error) {
 		return nil, errors.New("unsupported type")
 	}
 }
-
-// Given an existing buffer capacity and a requested one, finds a new buffer size.
-// For the first alloc this will equal requested size, then after at it leaves
-// a 25% buffer for future growth.
-func allocSize(bufCap, reqLen int) int {
-	if bufCap == 0 {
-		return reqLen
-	}
-	return 5 * reqLen / 4
-}
