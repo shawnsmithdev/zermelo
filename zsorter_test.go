@@ -104,10 +104,10 @@ func testOldSorter[T constraints.Ordered](t *testing.T, rgen func() T) {
 
 func testIntSorters[I constraints.Integer](t *testing.T, rgen func() I) {
 	var toTest []I
-	testSorter := NewIntSorter[I]()
+	testSorter := newIntSorter[I]()
 
 	// prevent comparison sort cutoff for testing
-	testSorter.(*zIntSorter[I]).compSortCutoff = 0
+	testSorter.setCutoff(0)
 
 	var attempts int
 	for size := 3; size < testGiveUpRace; size++ {
@@ -157,15 +157,9 @@ func testIntSort[T constraints.Integer](t *testing.T, toTest []T, zsort IntSorte
 
 func testFloatSorters[F constraints.Float](t *testing.T, rgen func() F) {
 	var toTest []F
-	testSorter := NewFloatSorter[F]()
-
+	testSorter := newFloatSorter[F]()
 	// prevent comparison sort cutoff for testing
-	is32 := isFloat32[F]()
-	if is32 {
-		testSorter.(*zFloatSorter[F, uint32]).compSortCutoff = 0
-	} else {
-		testSorter.(*zFloatSorter[F, uint64]).compSortCutoff = 0
-	}
+	testSorter.setCutoff(0)
 
 	for size := 0; size < testGiveUpRace; size++ {
 		toTest = make([]F, size)

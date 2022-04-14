@@ -22,24 +22,24 @@ func New() Sorter {
 }
 
 type zSorter struct {
-	ints     IntSorter[int]
-	int64s   IntSorter[int64]
-	int32s   IntSorter[int32]
-	int16s   IntSorter[int16]
-	int8s    IntSorter[int8]
-	uints    IntSorter[uint]
-	uintptrs IntSorter[uintptr]
-	uint64s  IntSorter[uint64]
-	uint32s  IntSorter[uint32]
-	uint16s  IntSorter[uint16]
-	uint8s   IntSorter[uint8]
-	float64s FloatSorter[float64]
-	float32s FloatSorter[float32]
+	ints     cutoffIntSorter[int]
+	int64s   cutoffIntSorter[int64]
+	int32s   cutoffIntSorter[int32]
+	int16s   cutoffIntSorter[int16]
+	int8s    cutoffIntSorter[int8]
+	uints    cutoffIntSorter[uint]
+	uintptrs cutoffIntSorter[uintptr]
+	uint64s  cutoffIntSorter[uint64]
+	uint32s  cutoffIntSorter[uint32]
+	uint16s  cutoffIntSorter[uint16]
+	uint8s   cutoffIntSorter[uint8]
+	float64s cutoffFloatSorter[float64]
+	float32s cutoffFloatSorter[float32]
 }
 
-func maybeIntSort[I constraints.Integer](x []I, sorter IntSorter[I]) (IntSorter[I], bool) {
+func maybeIntSort[I constraints.Integer](x []I, sorter cutoffIntSorter[I]) (cutoffIntSorter[I], bool) {
 	if sorter == nil {
-		result := NewIntSorter[I]()
+		result := newIntSorter[I]()
 		result.Sort(x)
 		return result, true
 	}
@@ -47,9 +47,9 @@ func maybeIntSort[I constraints.Integer](x []I, sorter IntSorter[I]) (IntSorter[
 	return sorter, false
 }
 
-func maybeFloatSort[F constraints.Float](x []F, sorter FloatSorter[F]) (FloatSorter[F], bool) {
+func maybeFloatSort[F constraints.Float](x []F, sorter cutoffFloatSorter[F]) (cutoffFloatSorter[F], bool) {
 	if sorter == nil {
-		result := NewFloatSorter[F]()
+		result := newFloatSorter[F]()
 		result.Sort(x)
 		return result, true
 	}

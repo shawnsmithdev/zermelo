@@ -11,9 +11,16 @@ type IntSorter[I constraints.Integer] interface {
 	Sort(x []I)
 }
 
+type cutoffIntSorter[I constraints.Integer] interface {
+	IntSorter[I]
+	setCutoff(int)
+}
+
 type zIntSorter[I constraints.Integer] struct {
 	buf            []I
 	compSortCutoff int
+	minval         I
+	size           uint
 }
 
 func (z *zIntSorter[I]) Sort(x []I) {
@@ -24,7 +31,11 @@ func (z *zIntSorter[I]) Sort(x []I) {
 	if len(z.buf) < len(x) {
 		z.buf = make([]I, allocSize(len(z.buf), len(x)))
 	}
-	SortIntegersBYOB(x, z.buf)
+	sortIntegersBYOB(x, z.buf, z.size, z.minval)
+}
+
+func (z *zIntSorter[I]) setCutoff(cutoff int) {
+	z.compSortCutoff = cutoff
 }
 
 // NewIntSorter creates a new IntSorter that will use radix sort on large slices and reuses buffers.
@@ -32,11 +43,19 @@ func (z *zIntSorter[I]) Sort(x []I) {
 // Later sorts may grow this buffer as needed. The IntSorter returned is not thread safe.
 // Using this sorter can be much faster than repeat calls to SortIntegers.
 func NewIntSorter[I constraints.Integer]() IntSorter[I] {
-	result := &zIntSorter[I]{}
-	if size, _ := detect[I](); size == 64 {
-		result.compSortCutoff = compSortCutoff64
-	} else {
-		result.compSortCutoff = compSortCutoff
+	return newIntSorter[I]()
+}
+
+func newIntSorter[I constraints.Integer]() cutoffIntSorter[I] {
+	size, minval := detect[I]()
+	cutoff := compSortCutoff
+	if size == 64 {
+		cutoff = compSortCutoff64
+	}
+	result := &zIntSorter[I]{
+		compSortCutoff: cutoff,
+		minval:         minval,
+		size:           size,
 	}
 	return result
 }
