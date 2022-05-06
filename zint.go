@@ -18,18 +18,20 @@ func SortIntegers[T constraints.Integer](x []T) {
 		return
 	}
 	size, minval := detect[T]()
-	if (size == 64 && len(x) < compSortCutoff64) || len(x) < compSortCutoff {
+	if len(x) < compSortCutoff || (size == 64 && len(x) < compSortCutoff64) {
 		slices.Sort(x)
-		return
+	} else {
+		sortIntegersBYOB(x, make([]T, len(x)), size, minval)
 	}
-	sortIntegersBYOB(x, make([]T, len(x)), size, minval)
 }
 
 // SortIntegersBYOB sorts integer slices with radix sort using the provided buffer.
 // len(buf) must be greater or equal to len(x).
 func SortIntegersBYOB[T constraints.Integer](x, buffer []T) {
-	size, minval := detect[T]()
-	sortIntegersBYOB(x, buffer, size, minval)
+	if len(x) >= 2 {
+		size, minval := detect[T]()
+		sortIntegersBYOB(x, buffer, size, minval)
+	}
 }
 
 func sortIntegersBYOB[T constraints.Integer](x, buffer []T, size uint, minval T) {

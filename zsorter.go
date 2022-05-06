@@ -6,17 +6,17 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-// Sorter can sort slices
+// Sorter can sort slices. This interface is deprecated, use IntSorter or FloatSorter.
 type Sorter interface {
 	// Sort attempts to sort x, returning an error if unable to sort.
 	Sort(x any) error
 	// CopySort returns a sorted copy of x, or an error if unable to copy or sort.
-	CopySort(x any) (interface{}, error)
+	CopySort(x any) (any, error)
 }
 
 // New creates a Sorter that reuses buffers on repeated Sort() or CopySort() calls on the same type.
 // This is not thread safe. CopySort() does not support passthrough of sort.Interface values.
-// This style of sorter is deprecated, use NewIntSorter/NewFloatSorter
+// This style of sorter is deprecated, use NewIntSorter or NewFloatSorter.
 func New() Sorter {
 	return &zSorter{}
 }

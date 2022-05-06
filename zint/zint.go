@@ -1,9 +1,10 @@
 // Package zint implements radix sort for []int.
-// This package is deprecated
+// This package is deprecated.
 package zint
 
 import (
 	"github.com/shawnsmithdev/zermelo"
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -12,21 +13,23 @@ const (
 	MinSize = 256
 )
 
-// Sort sorts x using a Radix sort (Small slices are sorted with slices.Sort() instead).
+// Sort sorts x.
+// This is deprecated, use zermelo.SortIntegers instead.
 func Sort(x []int) {
 	zermelo.SortIntegers(x)
 }
 
 // SortCopy is similar to Sort, but returns a sorted copy of x, leaving x unmodified.
+// This is deprecated. Use slices.Clone and zermelo.SortIntegers.
 func SortCopy(x []int) []int {
-	y := make([]int, len(x))
-	copy(y, x)
-	Sort(y)
+	y := slices.Clone(x)
+	zermelo.SortIntegers(y)
 	return y
 }
 
 // SortBYOB sorts a []int using a Radix sort, using supplied buffer space. Panics if
 // len(x) does not equal len(buffer). Uses radix sort even on small slices.
+// This is deprecated, use zermelo.SortIntegersBYOB instead.
 func SortBYOB(x, buffer []int) {
 	zermelo.SortIntegersBYOB(x, buffer)
 }
