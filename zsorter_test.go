@@ -115,7 +115,7 @@ func testIntSorters[I constraints.Integer](t *testing.T, rgen func() I) {
 		toTest = make([]I, size)
 		for attempts > 0 {
 			fillSlice(toTest, rgen)
-			if testIntSort[I](t, toTest, testSorter) {
+			if testIntSorter[I](t, toTest, testSorter) {
 				attempts--
 			} else {
 				break
@@ -135,7 +135,7 @@ func testIntSorters[I constraints.Integer](t *testing.T, rgen func() I) {
 	}
 }
 
-func testIntSort[T constraints.Integer](t *testing.T, toTest []T, zsort IntSorter[T]) bool {
+func testIntSorter[T constraints.Integer](t *testing.T, toTest []T, zsort IntSorter[T]) bool {
 	control := make([]T, len(toTest))
 	copy(control, toTest)
 	gstart := time.Now()
@@ -215,30 +215,4 @@ func fillSlice[T any](x []T, gen func() T) {
 	for i := range x {
 		x[i] = gen()
 	}
-}
-
-func TestDetect(t *testing.T) {
-	testDetect[uint](t, bitSize, 0)
-	testDetect[uint8](t, 8, 0)
-	testDetect[uint16](t, 16, 0)
-	testDetect[uint32](t, 32, 0)
-	testDetect[uint64](t, 64, 0)
-	testDetect[int](t, bitSize, math.MinInt)
-	testDetect[int8](t, 8, math.MinInt8)
-	testDetect[int16](t, 16, math.MinInt16)
-	testDetect[int32](t, 32, math.MinInt32)
-	testDetect[int64](t, 64, math.MinInt64)
-}
-
-func testDetect[I constraints.Integer](t *testing.T, size uint, min I) {
-	start := time.Now()
-	detectedSize, detectedMin := detect[I]()
-	delta := time.Now().Sub(start)
-	if size != detectedSize {
-		t.Fatalf("%T: Wrong size, expected %v, got %v", I(0), size, detectedSize)
-	}
-	if detectedMin != min {
-		t.Fatalf("%T: Wrong min, expected %v, got %v", I(0), min, detectedMin)
-	}
-	t.Logf("%T: detect in %v", I(0), delta)
 }

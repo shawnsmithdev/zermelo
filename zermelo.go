@@ -11,6 +11,7 @@ import (
 // If x is a supported slice type, this library will be used to sort it. Otherwise,
 // if x implements sort.Interface it will passthrough to the sort.Sort() algorithm.
 // Returns an error on unsupported types.
+// As of v1.5.0, is generally preferable to use zermelo.SortIntegers or zermelo.SortFloats instead.
 func Sort(x any) error {
 	switch xAsCase := x.(type) {
 	case []float32:

@@ -24,6 +24,9 @@ type zFloatSorter[F constraints.Float, U constraints.Unsigned] struct {
 }
 
 func (z *zFloatSorter[F, U]) Sort(x []F) {
+	if len(x) < 2 {
+		return
+	}
 	if len(x) < z.compSortCutoff {
 		slices.Sort(x)
 		return
@@ -31,7 +34,7 @@ func (z *zFloatSorter[F, U]) Sort(x []F) {
 	if len(z.buf) < len(x) {
 		z.buf = make([]U, allocSize(len(z.buf), len(x)))
 	}
-	unsafeFlipSortFlip[F, []F, U](x, z.buf, z.size)
+	unsafeFlipSortFlip[F, U](x, z.buf, z.size)
 }
 
 func (z *zFloatSorter[F, U]) setCutoff(cutoff int) {

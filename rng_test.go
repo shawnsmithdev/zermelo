@@ -21,28 +21,37 @@ func randInteger[I constraints.Integer]() func() I {
 	}
 }
 
-// TODO: as of go 1.18, slices.Sort doesn't handle NaNs at all. So neither do we. So we don't test them anymore.
-// TODO: In practice NaNs will still go in front of other values.
+// returns a function that returns random float32s, without NaNs
+func randFloat32() func() float32 {
+	return noNans(randFloat32WithNans())
+}
 
-// returns a function that returns random non-NaN float64s
+// returns a function that returns random float64s, without NaNs
 func randFloat64() func() float64 {
-	uintRng := randInteger[uint64]()
-	return func() float64 {
-		for {
-			if x := math.Float64frombits(uintRng()); !math.IsNaN(x) {
-				return x
-			}
-		}
+	return noNans(randFloat64WithNans())
+}
+
+// returns a function that returns random float32s, including NaNs
+func randFloat32WithNans() func() float32 {
+	rng := randInteger[uint32]()
+	return func() float32 {
+		return math.Float32frombits(rng())
 	}
 }
 
-// returns a function that returns random non-NaN float32s
-func randFloat32() func() float32 {
-	uintRng := randInteger[uint32]()
-	return func() float32 {
+// returns a function that returns random float64s, including NaNs
+func randFloat64WithNans() func() float64 {
+	rng := randInteger[uint64]()
+	return func() float64 {
+		return math.Float64frombits(rng())
+	}
+}
+
+func noNans[F constraints.Float](rng func() F) func() F {
+	return func() F {
 		for {
-			if x := math.Float32frombits(uintRng()); !math.IsNaN(float64(x)) {
-				return x
+			if result := rng(); !math.IsNaN(float64(result)) {
+				return result
 			}
 		}
 	}
