@@ -3,7 +3,6 @@ package zermelo
 import (
 	"golang.org/x/exp/constraints"
 	"golang.org/x/exp/slices"
-	"math"
 )
 
 // FloatSorter describes types that can sort float slices
@@ -24,6 +23,7 @@ type zFloatSorter[F constraints.Float, U constraints.Unsigned] struct {
 }
 
 func (z *zFloatSorter[F, U]) Sort(x []F) {
+	x = sortNaNs(x)
 	if len(x) < 2 {
 		return
 	}
@@ -60,8 +60,4 @@ func newFloatSorter[F constraints.Float]() cutoffFloatSorter[F] {
 		size:           64,
 		compSortCutoff: compSortCutoffFloat64,
 	}
-}
-
-func isFloat32[F constraints.Float]() bool {
-	return F(math.SmallestNonzeroFloat32)/2 == 0
 }

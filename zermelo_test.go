@@ -47,8 +47,8 @@ func TestSort(t *testing.T) {
 	testSort[uint64](t, randInteger[uint64]())
 	testSort[uintptr](t, randInteger[uintptr]())
 	testSort[uint](t, randInteger[uint]())
-	testSort[float32](t, randFloat32())
-	testSort[float64](t, randFloat64())
+	testSort[float32](t, randFloat32(false))
+	testSort[float64](t, randFloat64(false))
 }
 
 func testSort[N constraints.Ordered](t *testing.T, rng func() N) {

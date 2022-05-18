@@ -19,8 +19,8 @@ func TestSortFloatsBYOBEmpty(t *testing.T) {
 
 func TestSortFloats(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
-	testSortFloats[float32](t, randFloat32())
-	testSortFloats[float64](t, randFloat64())
+	testSortFloats[float32](t, randFloat32(false))
+	testSortFloats[float64](t, randFloat64(false))
 }
 
 func testSortFloats[F constraints.Float](t *testing.T, rng func() F) {
@@ -43,7 +43,7 @@ func testSortFloats[F constraints.Float](t *testing.T, rng func() F) {
 
 func TestSortFloatsWithNans(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
-	rng := randFloat64()
+	rng := randFloat64(true)
 	toTest := make([]float64, 2*compSortCutoffFloat64)
 	fillSlice(toTest, rng)
 	SortFloats(toTest)

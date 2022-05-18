@@ -21,38 +21,24 @@ func randInteger[I constraints.Integer]() func() I {
 	}
 }
 
-// returns a function that returns random float32s, without NaNs
-func randFloat32() func() float32 {
-	return noNans(randFloat32WithNans())
-}
-
-// returns a function that returns random float64s, without NaNs
-func randFloat64() func() float64 {
-	return noNans(randFloat64WithNans())
-}
-
-// returns a function that returns random float32s, including NaNs
-func randFloat32WithNans() func() float32 {
-	rng := randInteger[uint32]()
-	return func() float32 {
-		return math.Float32frombits(rng())
-	}
-}
-
-// returns a function that returns random float64s, including NaNs
-func randFloat64WithNans() func() float64 {
-	rng := randInteger[uint64]()
-	return func() float64 {
-		return math.Float64frombits(rng())
-	}
-}
-
-func noNans[F constraints.Float](rng func() F) func() F {
+// returns a function that returns random floats
+func randFloat[F constraints.Float, U constraints.Unsigned](fromBits func(U) F, nans bool) func() F {
+	rng := randInteger[U]()
 	return func() F {
 		for {
-			if result := rng(); !math.IsNaN(float64(result)) {
+			if result := fromBits(rng()); nans || !isNaN(result) {
 				return result
 			}
 		}
 	}
+}
+
+// returns a function that returns random float32s
+func randFloat32(nans bool) func() float32 {
+	return randFloat[float32, uint32](math.Float32frombits, nans)
+}
+
+// returns a function that returns random float64s
+func randFloat64(nans bool) func() float64 {
+	return randFloat[float64, uint64](math.Float64frombits, nans)
 }
