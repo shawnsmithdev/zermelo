@@ -3,16 +3,13 @@ package zermelo
 import (
 	"golang.org/x/exp/constraints"
 	"golang.org/x/exp/slices"
-	"math"
 	"math/rand"
+	"sort"
 	"testing"
 	"time"
 )
 
-//TODO: This needs some dry'ing
-
 const (
-	testRequireWinRace     = false // racing can fail due to instrumenting, low precision os clocks, etc
 	testGiveUpRace         = 2 * compSortCutoff64
 	testRaceAttemptsAtSize = 32
 	testOldSorterSize      = 1024
@@ -39,8 +36,10 @@ func TestSignedSorters(t *testing.T) {
 
 func TestFloatSorters(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
-	testFloatSorters[float64](t, randFloat64())
-	testFloatSorters[float32](t, randFloat32())
+	testFloatSorters[float64](t, randFloat64(false), false)
+	testFloatSorters[float32](t, randFloat32(false), false)
+	testFloatSorters[float64](t, randFloat64(true), true)
+	testFloatSorters[float32](t, randFloat32(true), true)
 }
 
 func TestOldSorters(t *testing.T) {
@@ -56,8 +55,8 @@ func TestOldSorters(t *testing.T) {
 	testOldSorter[uint32](t, randInteger[uint32]())
 	testOldSorter[uint16](t, randInteger[uint16]())
 	testOldSorter[uint8](t, randInteger[uint8]())
-	testOldSorter[float32](t, randFloat32())
-	testOldSorter[float64](t, randFloat64())
+	testOldSorter[float32](t, randFloat32(false))
+	testOldSorter[float64](t, randFloat64(false))
 }
 
 func testOldSorter[T constraints.Ordered](t *testing.T, rgen func() T) {
@@ -81,7 +80,6 @@ func testOldSorter[T constraints.Ordered](t *testing.T, rgen func() T) {
 	if !slices.IsSorted(toTest) {
 		t.Fatalf("(%T) should have been sorted", toTest)
 	}
-	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(toTest), func(i, j int) {
 		toTest[i], toTest[j] = toTest[j], toTest[i]
 	})
@@ -98,118 +96,84 @@ func testOldSorter[T constraints.Ordered](t *testing.T, rgen func() T) {
 		}
 	} else {
 		t.Fatalf("(%T) should have been able to cast", toTest)
-
 	}
 }
 
 func testIntSorters[I constraints.Integer](t *testing.T, rgen func() I) {
-	var toTest []I
 	testSorter := newIntSorter[I]()
+	testSorter.setCutoff(0) // prevent comparison sort cutoff for testing
+	testSorters[I](t, rgen, testSorter, slices.Sort[I], "slices.Sort")
+	testSorters[I](t, rgen, testSorter, sortSort[I], "sort.Sort")
+}
 
-	// prevent comparison sort cutoff for testing
-	testSorter.setCutoff(0)
+func testFloatSorters[F constraints.Float](t *testing.T, rgen func() F, nans bool) {
+	testSorter := newFloatSorter[F]()
+	testSorter.setCutoff(0) // prevent comparison sort cutoff for testing
+	if nans {
+		testSorters[F](t, rgen, testSorter, nanSortSort[F], "sort.Sort")
+	} else {
+		testSorters[F](t, rgen, testSorter, slices.Sort[F], "slices.Sort")
+	}
+}
 
+type nSorter[N constraints.Ordered] interface {
+	Sort(x []N)
+}
+
+func testSorters[N constraints.Ordered](t *testing.T, rgen func() N, sorter nSorter[N], gsort func([]N), name string) {
+	var toTest []N
 	var attempts int
 	for size := 3; size < testGiveUpRace; size++ {
 		attempts = testRaceAttemptsAtSize
-		toTest = make([]I, size)
+		toTest = make([]N, size)
+		control := make([]N, size)
 		for attempts > 0 {
 			fillSlice(toTest, rgen)
-			if testIntSorter[I](t, toTest, testSorter) {
+			copy(control, toTest)
+			gstart := time.Now()
+			gsort(control)
+			gdelta := time.Now().Sub(gstart)
+			zstart := time.Now()
+			sorter.Sort(toTest)
+			zdelta := time.Now().Sub(zstart)
+			for idx, val := range control {
+				if val != toTest[idx] && !(isNaN(val) && isNaN(toTest[idx])) {
+					t.Fatal(control, toTest)
+				}
+			}
+			if !slices.IsSorted(toTest) {
+				t.Fatal(control, toTest)
+			}
+			if zdelta < gdelta {
 				attempts--
 			} else {
 				break
 			}
 		}
 		if attempts == 0 {
-			t.Logf("%T: Won %v in a row at size %d", toTest, testRaceAttemptsAtSize, size)
+			t.Logf("%T: Won %v in a row vs. %s at size %d", toTest, testRaceAttemptsAtSize, name, size)
 			return
 		}
 	}
 	if attempts != 0 {
-		if testRequireWinRace {
-			t.Fatalf("[%T] attempts: %d, size: %d", toTest, attempts, len(toTest))
-		} else {
-			t.Logf("%T: Gave up racing at size %d", toTest, testGiveUpRace)
-		}
+		t.Logf("%T: Gave up racing vs. %s at size %d", toTest, name, testGiveUpRace)
 	}
 }
 
-func testIntSorter[T constraints.Integer](t *testing.T, toTest []T, zsort IntSorter[T]) bool {
-	control := make([]T, len(toTest))
-	copy(control, toTest)
-	gstart := time.Now()
-	slices.Sort(control)
-	gdelta := time.Now().Sub(gstart)
-	zstart := time.Now()
-	zsort.Sort(toTest)
-	zdelta := time.Now().Sub(zstart)
-	for idx, val := range control {
-		if val != toTest[idx] {
-			t.Fatal(control, toTest)
-		}
-	}
-	if !slices.IsSorted(toTest) {
-		t.Fatal(control, toTest)
-	}
-	return zdelta < gdelta
-}
+type sortable[N constraints.Ordered] []N
 
-func testFloatSorters[F constraints.Float](t *testing.T, rgen func() F) {
-	var toTest []F
-	testSorter := newFloatSorter[F]()
-	// prevent comparison sort cutoff for testing
-	testSorter.setCutoff(0)
+func (x sortable[N]) Len() int           { return len(x) }
+func (x sortable[N]) Less(i, j int) bool { return x[i] < x[j] }
+func (x sortable[N]) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
 
-	for size := 0; size < testGiveUpRace; size++ {
-		toTest = make([]F, size)
-		attempts := testRaceAttemptsAtSize
-		for attempts > 0 {
-			fillSlice(toTest, rgen)
-			if testFloatSorter[F](t, toTest, testSorter) && size > 2 {
-				attempts--
-			} else {
-				attempts = -1
-			}
-			if !slices.IsSorted(toTest) {
-				t.Fatal(toTest)
-			}
-		}
-		if attempts == 0 {
-			t.Logf("%T: Won %v in a row at size %d", toTest, testRaceAttemptsAtSize, size)
-			return
-		}
-	}
-	if testRequireWinRace {
-		t.Fail()
-	} else {
-		t.Logf("%T: Gave up racing at size %d", toTest, testGiveUpRace)
-	}
-}
+type nanSortable[N constraints.Ordered] []N
 
-func testFloatSorter[T constraints.Float](t *testing.T, toTest []T, zsort FloatSorter[T]) bool {
-	control := make([]T, len(toTest))
-	copy(control, toTest)
-	gstart := time.Now()
-	slices.Sort(control)
-	gdelta := time.Now().Sub(gstart)
-	zstart := time.Now()
-	zsort.Sort(toTest)
-	zdelta := time.Now().Sub(zstart)
-	for idx, val := range control {
-		if math.IsNaN(float64(val)) {
-			if !math.IsNaN(float64(toTest[idx])) {
-				t.Fatal(control, toTest)
-			}
-		} else if val != toTest[idx] {
-			t.Fatal(control, toTest)
-		}
-	}
-	if !slices.IsSorted(toTest) {
-		t.Fatal(control, toTest)
-	}
-	return zdelta < gdelta
-}
+func (x nanSortable[N]) Len() int           { return len(x) }
+func (x nanSortable[N]) Less(i, j int) bool { return x[i] < x[j] || (isNaN(x[i]) && !isNaN(x[j])) }
+func (x nanSortable[N]) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
+
+func sortSort[T constraints.Ordered](x []T)    { sort.Sort(sortable[T](x)) }
+func nanSortSort[T constraints.Ordered](x []T) { sort.Sort(nanSortable[T](x)) }
 
 func fillSlice[T any](x []T, gen func() T) {
 	for i := range x {

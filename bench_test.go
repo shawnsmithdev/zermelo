@@ -154,7 +154,7 @@ func testIntSortBencher[T constraints.Integer](b *testing.B, size int, s sorter[
 
 func testFloatSortBencher(b *testing.B, size int, s sorter[float64]) {
 	rand.Seed(time.Now().UnixNano())
-	testBencher(b, s, testDataFromRng[float64](randFloat64(), size))
+	testBencher(b, s, testDataFromRng[float64](randFloat64(false), size))
 }
 
 // for bench b, tests s by copying rnd to x and sorting x repeatedly
