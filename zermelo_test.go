@@ -1,6 +1,7 @@
 package zermelo
 
 import (
+	"github.com/shawnsmithdev/zermelo/v2/internal"
 	"golang.org/x/exp/constraints"
 	"golang.org/x/exp/slices"
 	"math/rand"
@@ -9,63 +10,54 @@ import (
 )
 
 const (
-	testSize = 512
+	// Const int size thanks to kostya-sh@github
+	intSize  uint = 1 << (5 + (^uint(0))>>32&1)
+	testSize      = 2 * compSortCutoff64
 )
-
-func TestSortEmpty(t *testing.T) {
-	testSortEmpty[int8](t)
-	testSortEmpty[int16](t)
-	testSortEmpty[int32](t)
-	testSortEmpty[int64](t)
-	testSortEmpty[int](t)
-	testSortEmpty[uint8](t)
-	testSortEmpty[uint16](t)
-	testSortEmpty[uint32](t)
-	testSortEmpty[uint64](t)
-	testSortEmpty[uintptr](t)
-	testSortEmpty[uint](t)
-	testSortEmpty[float32](t)
-	testSortEmpty[float64](t)
-}
-
-func testSortEmpty[N any](t *testing.T) {
-	if err := Sort([]N{}); err != nil {
-		t.Fail()
-	}
-}
 
 func TestSort(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
-	testSort[int8](t, randInteger[int8]())
-	testSort[int16](t, randInteger[int16]())
-	testSort[int32](t, randInteger[int32]())
-	testSort[int64](t, randInteger[int64]())
-	testSort[int](t, randInteger[int]())
-	testSort[uint8](t, randInteger[uint8]())
-	testSort[uint16](t, randInteger[uint16]())
-	testSort[uint32](t, randInteger[uint32]())
-	testSort[uint64](t, randInteger[uint64]())
-	testSort[uintptr](t, randInteger[uintptr]())
-	testSort[uint](t, randInteger[uint]())
-	testSort[float32](t, randFloat32(false))
-	testSort[float64](t, randFloat64(false))
+	testSort[int8](t, internal.RandInteger[int8](), false)
+	testSort[int16](t, internal.RandInteger[int16](), false)
+	testSort[int32](t, internal.RandInteger[int32](), false)
+	testSort[int64](t, internal.RandInteger[int64](), false)
+	testSort[int](t, internal.RandInteger[int](), false)
+	testSort[uint8](t, internal.RandInteger[uint8](), false)
+	testSort[uint16](t, internal.RandInteger[uint16](), false)
+	testSort[uint32](t, internal.RandInteger[uint32](), false)
+	testSort[uint64](t, internal.RandInteger[uint64](), false)
+	testSort[uintptr](t, internal.RandInteger[uintptr](), false)
+	testSort[uint](t, internal.RandInteger[uint](), false)
 }
 
-func testSort[N constraints.Ordered](t *testing.T, rng func() N) {
-	toTest := make([]N, testSize)
-	fillSlice(toTest, rng)
-	control := make([]N, len(toTest))
-	copy(control, toTest)
-	gstart := time.Now()
-	slices.Sort(control)
-	gdelta := time.Now().Sub(gstart)
-	zstart := time.Now()
-	if err := Sort(toTest); err != nil {
-		t.Fatal(err)
+func TestSortBYOB(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
+	testSort[int8](t, internal.RandInteger[int8](), true)
+	testSort[int16](t, internal.RandInteger[int16](), true)
+	testSort[int32](t, internal.RandInteger[int32](), true)
+	testSort[int64](t, internal.RandInteger[int64](), true)
+	testSort[int](t, internal.RandInteger[int](), true)
+	testSort[uint8](t, internal.RandInteger[uint8](), true)
+	testSort[uint16](t, internal.RandInteger[uint16](), true)
+	testSort[uint32](t, internal.RandInteger[uint32](), true)
+	testSort[uint64](t, internal.RandInteger[uint64](), true)
+	testSort[uintptr](t, internal.RandInteger[uintptr](), true)
+	testSort[uint](t, internal.RandInteger[uint](), true)
+}
+
+func testSort[N constraints.Integer](t *testing.T, rng func() N, byob bool) {
+	for i := 0; i <= testSize; i++ {
+		toTest := make([]N, i)
+		internal.FillSlice(toTest, rng)
+		control := slices.Clone(toTest)
+		slices.Sort(control)
+		if byob {
+			SortBYOB(toTest, make([]N, i))
+		} else {
+			Sort(toTest)
+		}
+		if !slices.Equal(control, toTest) {
+			t.Fatal(control, toTest)
+		}
 	}
-	zdelta := time.Now().Sub(zstart)
-	if !slices.Equal(control, toTest) {
-		t.Fatal(control, toTest)
-	}
-	t.Logf("[%T] gsort:%v, zsort:%v", toTest[0], gdelta, zdelta)
 }
