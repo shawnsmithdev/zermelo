@@ -10,7 +10,7 @@ A radix sorting library for Go.  Trade memory for speed! Now with more generics!
 import "github.com/shawnsmithdev/zermelo/v2"
 
 func foo(large []uint64)
-    zermelo.SortIntegers(large)
+    zermelo.Sort(large)
 }
 ```
 
