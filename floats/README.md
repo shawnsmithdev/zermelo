@@ -9,7 +9,7 @@ Example
 package main
 
 import (
-	"github.com/shawnsmithdev/zermelo/floats"
+	"github.com/shawnsmithdev/zermelo/v2/floats"
 	"something"
 )
 
