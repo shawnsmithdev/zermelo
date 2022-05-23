@@ -62,7 +62,7 @@ func foo(bar [][]uint64) {
 
 Float Subpackage
 ================
-`SortFloats` and `FloatSorter` provied in the `floats` subpackage support constraints.Float slices,
+`SortFloats` and `FloatSorter` provided in the `floats` subpackage support constraints.Float slices,
 specifically `[]float32` and `[]float64` and derived types.
 This uses the unsafe package to treat floats as though they were unsigned integers.
 
