@@ -1,10 +1,12 @@
 package zermelo
 
 import (
+	"github.com/shawnsmithdev/zermelo/v2/internal"
 	"golang.org/x/exp/constraints"
 	"golang.org/x/exp/slices"
 	"math/rand"
 	"runtime"
+	"sort"
 	"sync"
 	"testing"
 	"time"
@@ -16,102 +18,86 @@ const testSmallSize = compSortCutoff64
 const testMediumSize = 1024   // ~1k * 64bit = 8 KB
 const testLargeSize = 1 << 20 // ~1M * 64bit = 8 MB
 
-// []uint64
-func BenchmarkZSortUint64T(b *testing.B) {
-	sortFunc := func(x []uint64) {
-		SortIntegersBYOB[uint64](x, make([]uint64, testTinySize))
-	}
-	testIntSortBencher[uint64](b, testTinySize, sortFunc)
+// tiny32
+func BenchmarkSortSortInt32T(b *testing.B) {
+	testSortBencher[int32](b, testTinySize, sortSort[int32])
 }
-func BenchmarkZSorterUint64T(b *testing.B) {
-	s := newIntSorter[uint64]()
-	s.setCutoff(0)
-	testIntSortBencher[uint64](b, testTinySize, s.Sort)
+func BenchmarkSlicesSortInt32T(b *testing.B) {
+	testSortBencher[int32](b, testTinySize, slices.Sort[int32])
 }
-func BenchmarkGoSortUint64T(b *testing.B) {
-	testIntSortBencher[uint64](b, testTinySize, slices.Sort[uint64])
+func BenchmarkZSortInt32T(b *testing.B) {
+	testSortBencher[int32](b, testTinySize, Sort[int32])
 }
-func BenchmarkZSortUint64S(b *testing.B) {
-	testIntSortBencher[uint64](b, testSmallSize, SortIntegers[uint64])
-}
-func BenchmarkZSorterUint64S(b *testing.B) {
-	testIntSortBencher[uint64](b, testSmallSize, NewIntSorter[uint64]().Sort)
-}
-func BenchmarkGoSortUint64S(b *testing.B) {
-	testIntSortBencher[uint64](b, testSmallSize, slices.Sort[uint64])
-}
-func BenchmarkZSortUint64M(b *testing.B) {
-	testIntSortBencher[uint64](b, testMediumSize, SortIntegers[uint64])
-}
-func BenchmarkZSorterUint64M(b *testing.B) {
-	testIntSortBencher[uint64](b, testMediumSize, NewIntSorter[uint64]().Sort)
-}
-func BenchmarkGoSortUint64M(b *testing.B) {
-	testIntSortBencher[uint64](b, testMediumSize, slices.Sort[uint64])
-}
-func BenchmarkZSortUint64L(b *testing.B) {
-	testIntSortBencher[uint64](b, testLargeSize, SortIntegers[uint64])
-}
-func BenchmarkZSorterUint64L(b *testing.B) {
-	testIntSortBencher[uint64](b, testLargeSize, NewIntSorter[uint64]().Sort)
-}
-func BenchmarkGoSortUint64L(b *testing.B) {
-	testIntSortBencher[uint64](b, testLargeSize, slices.Sort[uint64])
+func BenchmarkZSorterInt32T(b *testing.B) {
+	testSortBencher[int32](b, testTinySize, newSorter[int32]().withCutoff(0).Sort)
 }
 
-// []float64
-func BenchmarkZSortFloat64T(b *testing.B) {
-	sortFunc := func(x []float64) {
-		SortFloatsBYOB(x, make([]float64, testTinySize))
-	}
-	testFloatSortBencher(b, testTinySize, sortFunc)
+// tiny
+func BenchmarkSortSortUint64T(b *testing.B) {
+	testSortBencher[uint64](b, testTinySize, sortSort[uint64])
 }
-func BenchmarkZSorterFloat64T(b *testing.B) {
-	s := newFloatSorter[float64]()
-	s.setCutoff(0)
-	testFloatSortBencher(b, testTinySize, s.Sort)
+func BenchmarkSlicesSortUint64T(b *testing.B) {
+	testSortBencher[uint64](b, testTinySize, slices.Sort[uint64])
 }
-func BenchmarkGoSortFloat64T(b *testing.B) {
-	testFloatSortBencher(b, testTinySize, slices.Sort[float64])
+func BenchmarkZSortUint64T(b *testing.B) {
+	testSortBencher[uint64](b, testTinySize, Sort[uint64])
 }
-func BenchmarkZSortFloat64S(b *testing.B) {
-	testFloatSortBencher(b, testSmallSize, SortFloats[float64])
+func BenchmarkZSorterUint64T(b *testing.B) {
+	testSortBencher[uint64](b, testTinySize, newSorter[uint64]().withCutoff(0).Sort)
 }
-func BenchmarkZSorterFloat64S(b *testing.B) {
-	testFloatSortBencher(b, testSmallSize, NewFloatSorter[float64]().Sort)
+
+// small
+func BenchmarkSortSortUint64S(b *testing.B) {
+	testSortBencher[uint64](b, testSmallSize, sortSort[uint64])
 }
-func BenchmarkGoSortFloat64S(b *testing.B) {
-	testFloatSortBencher(b, testSmallSize, slices.Sort[float64])
+func BenchmarkSlicesSortUint64S(b *testing.B) {
+	testSortBencher[uint64](b, testSmallSize, slices.Sort[uint64])
 }
-func BenchmarkZSortFloat64M(b *testing.B) {
-	testFloatSortBencher(b, testMediumSize, SortFloats[float64])
+func BenchmarkZSortUint64S(b *testing.B) {
+	testSortBencher[uint64](b, testSmallSize, Sort[uint64])
 }
-func BenchmarkZSorterFloat64M(b *testing.B) {
-	testFloatSortBencher(b, testMediumSize, NewFloatSorter[float64]().Sort)
+func BenchmarkZSorterUint64S(b *testing.B) {
+	testSortBencher[uint64](b, testSmallSize, newSorter[uint64]().withCutoff(0).Sort)
 }
-func BenchmarkGoSortFloat64M(b *testing.B) {
-	testFloatSortBencher(b, testMediumSize, slices.Sort[float64])
+
+// medium
+func BenchmarkSortSortUint64M(b *testing.B) {
+	testSortBencher[uint64](b, testMediumSize, sortSort[uint64])
 }
-func BenchmarkZSortFloat64L(b *testing.B) {
-	testFloatSortBencher(b, testLargeSize, SortFloats[float64])
+func BenchmarkSlicesSortUint64M(b *testing.B) {
+	testSortBencher[uint64](b, testMediumSize, slices.Sort[uint64])
 }
-func BenchmarkZSorterFloat64L(b *testing.B) {
-	testFloatSortBencher(b, testLargeSize, NewFloatSorter[float64]().Sort)
+func BenchmarkZSortUint64M(b *testing.B) {
+	testSortBencher[uint64](b, testMediumSize, Sort[uint64])
 }
-func BenchmarkGoSortFloat64L(b *testing.B) {
-	testFloatSortBencher(b, testLargeSize, slices.Sort[float64])
+func BenchmarkZSorterUint64M(b *testing.B) {
+	testSortBencher[uint64](b, testMediumSize, newSorter[uint64]().withCutoff(0).Sort)
+}
+
+// large
+func BenchmarkSortSortUint64L(b *testing.B) {
+	testSortBencher[uint64](b, testLargeSize, sortSort[uint64])
+}
+func BenchmarkSlicesSortUint64L(b *testing.B) {
+	testSortBencher[uint64](b, testLargeSize, slices.Sort[uint64])
+}
+func BenchmarkZSortUint64L(b *testing.B) {
+	testSortBencher[uint64](b, testLargeSize, Sort[uint64])
+}
+func BenchmarkZSorterUint64L(b *testing.B) {
+	testSortBencher[uint64](b, testLargeSize, newSorter[uint64]().withCutoff(0).Sort)
 }
 
 func sortedTestData[T constraints.Integer](size int) func(int) [][]T {
 	return func(n int) [][]T {
-		result := testDataFromRng[T](randInteger[T](), size)(n)
+		result := testDataFromRng[T](internal.RandInteger[T](), size)(n)
 		var wg sync.WaitGroup
 		cpus := runtime.NumCPU()
 		for cpu := 0; cpu < cpus; cpu++ {
 			wg.Add(1)
 			go func(c int) {
 				defer wg.Done()
-				presorter := NewIntSorter[T]()
+				presorter := NewSorter[T]()
 				for i := c; i < len(result); i += cpus {
 					presorter.Sort(result[i])
 				}
@@ -123,42 +109,38 @@ func sortedTestData[T constraints.Integer](size int) func(int) [][]T {
 }
 
 // presorted
-func BenchmarkZSortSorted(b *testing.B) {
-	testBencher[uint64](b, SortIntegers[uint64], sortedTestData[uint64](testSmallSize))
+func BenchmarkSortSortSorted(b *testing.B) {
+	testBencher[uint64](b, sortSort[uint64], sortedTestData[uint64](testSmallSize))
 }
-func BenchmarkZSorterSorted(b *testing.B) {
-	testBencher[uint64](b, NewIntSorter[uint64]().Sort, sortedTestData[uint64](testSmallSize))
-}
-func BenchmarkGoSortSorted(b *testing.B) {
+func BenchmarkSlicesSortSorted(b *testing.B) {
 	testBencher[uint64](b, slices.Sort[uint64], sortedTestData[uint64](testSmallSize))
 }
-
-type sorter[T any] func([]T)
+func BenchmarkZSortSorted(b *testing.B) {
+	testBencher[uint64](b, Sort[uint64], sortedTestData[uint64](testSmallSize))
+}
+func BenchmarkZSorterSorted(b *testing.B) {
+	testBencher[uint64](b, NewSorter[uint64]().Sort, sortedTestData[uint64](testSmallSize))
+}
 
 func testDataFromRng[T any](rng func() T, size int) func(int) [][]T {
 	return func(n int) [][]T {
 		result := make([][]T, n)
 		for i := 0; i < n; i++ {
 			result[i] = make([]T, size)
-			fillSlice(result[i], rng)
+			internal.FillSlice(result[i], rng)
 		}
 		return result
 	}
 }
 
-func testIntSortBencher[T constraints.Integer](b *testing.B, size int, s sorter[T]) {
+func testSortBencher[T constraints.Integer](b *testing.B, size int, s func([]T)) {
 	rand.Seed(time.Now().UnixNano())
-	rng := randInteger[T]()
+	rng := internal.RandInteger[T]()
 	testBencher(b, s, testDataFromRng[T](rng, size))
 }
 
-func testFloatSortBencher(b *testing.B, size int, s sorter[float64]) {
-	rand.Seed(time.Now().UnixNano())
-	testBencher(b, s, testDataFromRng[float64](randFloat64(false), size))
-}
-
 // for bench b, tests s by copying rnd to x and sorting x repeatedly
-func testBencher[T constraints.Ordered](b *testing.B, s sorter[T], getTestData func(n int) [][]T) {
+func testBencher[T constraints.Ordered](b *testing.B, s func([]T), getTestData func(n int) [][]T) {
 	b.StopTimer()
 	rnd := getTestData(b.N)
 	b.ResetTimer()
@@ -166,4 +148,14 @@ func testBencher[T constraints.Ordered](b *testing.B, s sorter[T], getTestData f
 	for i := 0; i < b.N; i++ {
 		s(rnd[i])
 	}
+}
+
+type sortable[I constraints.Integer] []I
+
+func (s sortable[I]) Len() int           { return len(s) }
+func (s sortable[I]) Less(i, j int) bool { return s[i] < s[j] }
+func (s sortable[I]) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+
+func sortSort[I constraints.Integer](x []I) {
+	sort.Sort(sortable[I](x))
 }

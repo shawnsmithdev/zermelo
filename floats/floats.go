@@ -1,4 +1,4 @@
-package zermelo
+package floats
 
 import (
 	"golang.org/x/exp/constraints"
@@ -37,11 +37,9 @@ func SortFloatsBYOB[F constraints.Float](x, buffer []F) {
 
 func sortFloatsBYOB[F constraints.Float](x, buf []F, is32 bool) {
 	if is32 {
-		unsafeFlipSortFlip[F, uint32](
-			x, unsafeSliceConvert[F, uint32](buf), 32)
+		unsafeFlipSortFlip[F, uint32](x, buf, 32)
 	} else {
-		unsafeFlipSortFlip[F, uint64](
-			x, unsafeSliceConvert[F, uint64](buf), 64)
+		unsafeFlipSortFlip[F, uint64](x, buf, 64)
 	}
 	runtime.KeepAlive(buf) // avoid gc as buf is never used directly
 }
