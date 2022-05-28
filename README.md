@@ -1,8 +1,8 @@
 zermelo v2 
 =========
-[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/shawnsmithdev/zermelo)
+[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/shawnsmithdev/zermelo/v2)
 [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/shawnsmithdev/zermelo/master/LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/shawnsmithdev/zermelo)](https://goreportcard.com/report/github.com/shawnsmithdev/zermelo)
+[![Go Report Card](https://goreportcard.com/badge/github.com/shawnsmithdev/zermelo/v2)](https://goreportcard.com/report/github.com/shawnsmithdev/zermelo/v2)
 
 A radix sorting library for Go.  Trade memory for speed! Now with more generics!
 
