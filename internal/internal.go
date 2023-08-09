@@ -26,12 +26,14 @@ func Detect[T constraints.Integer]() (uint, T) {
 	return size, fffe << (size - 2)
 }
 
+// FillSlice will fill a slice with values returned by gen.
 func FillSlice[T any](x []T, gen func() T) {
 	for i := range x {
 		x[i] = gen()
 	}
 }
 
+// RandInteger returns a function that generates random integers, including negative values.
 func RandInteger[I constraints.Integer]() func() I {
 	tSize, _ := Detect[I]()
 	buf := make([]byte, tSize/8)

@@ -53,7 +53,7 @@ import "github.com/shawnsmithdev/zermelo/v2"
 
 func foo(bar [][]uint64) {
     sorter := zermelo.NewSorter[uint64]()
-    for _, x := range(bar) {
+    for _, x := range bar {
         sorter.Sort(x)
     }
 }
@@ -71,7 +71,7 @@ import "github.com/shawnsmithdev/zermelo/v2/floats"
 
 func foo(bar [][]floats64) {
     sorter := floats.NewFloatSorter[float64]()
-    for _, x := range(bar) {
+    for _, x := range bar {
         sorter.Sort(x)
     }
 }

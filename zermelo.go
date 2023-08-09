@@ -27,7 +27,7 @@ func Sort[T constraints.Integer](x []T) {
 }
 
 // SortBYOB sorts integer slices with radix sort using the provided buffer.
-// len(buf) must be greater or equal to len(x).
+// len(buffer) must be greater or equal to len(x).
 func SortBYOB[T constraints.Integer](x, buffer []T) {
 	if len(x) >= 2 {
 		size, minval := internal.Detect[T]()
