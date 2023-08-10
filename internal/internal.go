@@ -2,13 +2,17 @@ package internal
 
 import (
 	"crypto/rand"
-	"golang.org/x/exp/constraints"
 )
 
 const maxSize uint = 64
 
+// Integer is a constraint that permits any integer type.
+type Integer interface {
+	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | ~int | ~int8 | ~int16 | ~int32 | ~int64
+}
+
 // Detect returns bit size and min value of T
-func Detect[T constraints.Integer]() (uint, T) {
+func Detect[T Integer]() (uint, T) {
 	// 'fffe' has all but least bit set
 	fffe := (^T(0)) ^ T(1)
 
@@ -34,7 +38,7 @@ func FillSlice[T any](x []T, gen func() T) {
 }
 
 // RandInteger returns a function that generates random integers, including negative values.
-func RandInteger[I constraints.Integer]() func() I {
+func RandInteger[I Integer]() func() I {
 	tSize, _ := Detect[I]()
 	buf := make([]byte, tSize/8)
 	return func() I {

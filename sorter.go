@@ -1,24 +1,24 @@
 package zermelo
 
 import (
+	"cmp"
 	"github.com/shawnsmithdev/zermelo/v2/internal"
-	"golang.org/x/exp/constraints"
 	"slices"
 )
 
 // Sorter describes types that can sort slices.
-type Sorter[T constraints.Ordered] interface {
+type Sorter[T cmp.Ordered] interface {
 	// Sort sorts slices in ascending order.
 	Sort(x []T)
 }
 
 // cutoffSorter is a Sorter with adjustable comparison sort cutoff, for testing.
-type cutoffSorter[T constraints.Integer] interface {
+type cutoffSorter[T Integer] interface {
 	Sorter[T]
 	withCutoff(int) cutoffSorter[T]
 }
 
-type sorter[I constraints.Integer] struct {
+type sorter[I Integer] struct {
 	buf            []I
 	compSortCutoff int
 	minval         I
@@ -45,11 +45,11 @@ func (s *sorter[I]) withCutoff(cutoff int) cutoffSorter[I] {
 // The first sort creates a buffer the same size as the slice being sorted and keeps it for future use.
 // Later sorts may grow this buffer as needed. The Sorter returned is not thread safe.
 // Using this sorter can be much faster than repeat calls to Sort.
-func NewSorter[I constraints.Integer]() Sorter[I] {
+func NewSorter[I Integer]() Sorter[I] {
 	return newSorter[I]()
 }
 
-func newSorter[I constraints.Integer]() cutoffSorter[I] {
+func newSorter[I Integer]() cutoffSorter[I] {
 	size, minval := internal.Detect[I]()
 	cutoff := compSortCutoff
 	if size == 64 {

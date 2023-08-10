@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"golang.org/x/exp/constraints"
 	"math"
 	"testing"
 	"time"
@@ -23,7 +22,7 @@ func TestDetect(t *testing.T) {
 	testDetect[int64](t, 64, math.MinInt64)
 }
 
-func testDetect[I constraints.Integer](t *testing.T, size uint, min I) {
+func testDetect[I Integer](t *testing.T, size uint, min I) {
 	start := time.Now()
 	detectedSize, detectedMin := Detect[I]()
 	delta := time.Now().Sub(start)

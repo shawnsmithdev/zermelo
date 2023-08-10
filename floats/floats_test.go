@@ -1,8 +1,8 @@
 package floats
 
 import (
+	"github.com/shawnsmithdev/zermelo/v2"
 	"github.com/shawnsmithdev/zermelo/v2/internal"
-	"golang.org/x/exp/constraints"
 	"math"
 	"slices"
 	"sort"
@@ -33,7 +33,7 @@ func TestSortNaNsBYOB(t *testing.T) {
 	testSort[float32](t, randFloat32(true), true, true)
 }
 
-func testSort[N constraints.Float](t *testing.T, rng func() N, byob, nans bool) {
+func testSort[N Float](t *testing.T, rng func() N, byob, nans bool) {
 	var buf []N
 	if byob {
 		buf = make([]N, testSize)
@@ -69,7 +69,7 @@ func randFloat64(nans bool) func() float64 {
 }
 
 // randFloat returns a function that returns random floats
-func randFloat[F constraints.Float, U constraints.Unsigned](fromBits func(U) F, nans bool) func() F {
+func randFloat[F Float, U zermelo.Unsigned](fromBits func(U) F, nans bool) func() F {
 	rng := internal.RandInteger[U]()
 	return func() F {
 		for {
@@ -80,17 +80,17 @@ func randFloat[F constraints.Float, U constraints.Unsigned](fromBits func(U) F, 
 	}
 }
 
-type sortable[F constraints.Float] []F
+type sortable[F Float] []F
 
 func (s sortable[F]) Len() int           { return len(s) }
 func (s sortable[F]) Less(i, j int) bool { return s[i] < s[j] || (isNaN(s[i]) && !isNaN(s[j])) }
 func (s sortable[F]) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 
-func sortSort[F constraints.Float](x []F) {
+func sortSort[F Float](x []F) {
 	sort.Sort(sortable[F](x))
 }
 
-func floatSlicesEqual[F constraints.Float](x, y []F) bool {
+func floatSlicesEqual[F Float](x, y []F) bool {
 	if len(x) != len(y) {
 		return false
 	}

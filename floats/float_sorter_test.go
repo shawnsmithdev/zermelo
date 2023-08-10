@@ -3,7 +3,6 @@ package floats
 import (
 	"github.com/shawnsmithdev/zermelo/v2"
 	"github.com/shawnsmithdev/zermelo/v2/internal"
-	"golang.org/x/exp/constraints"
 	"math"
 	"slices"
 	"testing"
@@ -53,7 +52,7 @@ func TestSorterOnlyNaNs(t *testing.T) {
 	}
 }
 
-func testSorter[F constraints.Float](gen func() F, nans bool, cutoff bool) bool {
+func testSorter[F Float](gen func() F, nans bool, cutoff bool) bool {
 	var test zermelo.Sorter[F]
 	if cutoff {
 		test = NewFloatSorter[F]()

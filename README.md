@@ -35,9 +35,7 @@ Zermelo is named after [Ernst Zermelo](http://en.wikipedia.org/wiki/Ernst_Zermel
 
 Supported Types
 ===============
-`Sort` and `NewSorter` support constraints.Integer slices,
-that is `[]int`, `[]uint64`, `[]byte`, etc, and derived types.
-
+`Sort` and `NewSorter` support integer slices, that is `[]int`, `[]uint64`, `[]byte`, etc, and derived types.
 
 Sorter
 ======
@@ -62,7 +60,7 @@ func foo(bar [][]uint64) {
 
 Float Subpackage
 ================
-`SortFloats` and `FloatSorter` provided in the `floats` subpackage support constraints.Float slices,
+`SortFloats` and `FloatSorter` provided in the `floats` subpackage support float slices,
 specifically `[]float32` and `[]float64` and derived types.
 This uses the unsafe package to treat floats as though they were unsigned integers.
 

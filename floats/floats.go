@@ -1,7 +1,6 @@
 package floats
 
 import (
-	"golang.org/x/exp/constraints"
 	"math"
 	"runtime"
 	"slices"
@@ -12,8 +11,13 @@ const (
 	compSortCutoffFloat64 = 384
 )
 
+// Float is a constraint that permits any floating-point type.
+type Float interface {
+	~float32 | ~float64
+}
+
 // SortFloats sorts float slices. If the slice is large enough, radix sort is used by allocating a new buffer.
-func SortFloats[F constraints.Float](x []F) {
+func SortFloats[F Float](x []F) {
 	x = sortNaNs(x)
 	if len(x) < 2 {
 		return
@@ -28,14 +32,14 @@ func SortFloats[F constraints.Float](x []F) {
 
 // SortFloatsBYOB sorts float slices with radix sort using the provided buffer.
 // len(buffer) must be greater or equal to len(x).
-func SortFloatsBYOB[F constraints.Float](x, buffer []F) {
+func SortFloatsBYOB[F Float](x, buffer []F) {
 	x = sortNaNs(x)
 	if len(x) >= 2 {
 		sortFloatsBYOB(x, buffer, isFloat32[F]())
 	}
 }
 
-func sortFloatsBYOB[F constraints.Float](x, buf []F, is32 bool) {
+func sortFloatsBYOB[F Float](x, buf []F, is32 bool) {
 	if is32 {
 		unsafeFlipSortFlip[F, uint32](x, buf, 32)
 	} else {
@@ -45,7 +49,7 @@ func sortFloatsBYOB[F constraints.Float](x, buf []F, is32 bool) {
 }
 
 // isFloat32 returns true if F is float32, false if float64
-func isFloat32[F constraints.Float]() bool {
+func isFloat32[F Float]() bool {
 	return F(math.SmallestNonzeroFloat32)/2 == 0
 }
 
@@ -53,7 +57,7 @@ func isFloat32[F constraints.Float]() bool {
 func isNaN[C comparable](x C) bool { return x != x }
 
 // sortNaNs put nans up front, similar to sort.Float64s, returning a slice of x excluding those nans
-func sortNaNs[F constraints.Float](x []F) []F {
+func sortNaNs[F Float](x []F) []F {
 	nans := 0
 	for idx, val := range x {
 		if isNaN(val) {

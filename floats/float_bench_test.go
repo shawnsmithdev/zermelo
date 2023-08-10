@@ -1,8 +1,8 @@
 package floats
 
 import (
+	"cmp"
 	"github.com/shawnsmithdev/zermelo/v2/internal"
-	"golang.org/x/exp/constraints"
 	"runtime"
 	"slices"
 	"sync"
@@ -125,7 +125,7 @@ func testDataFromRng[T any](rng func() T, size int) func(int) [][]T {
 
 // sortedTestData creates a function that generates tables of presorted test data
 // using the given random value generator and slice size.
-func sortedTestData[T constraints.Ordered](rng func() T, size int) func(int) [][]T {
+func sortedTestData[T cmp.Ordered](rng func() T, size int) func(int) [][]T {
 	return func(n int) [][]T {
 		result := testDataFromRng[T](rng, size)(n)
 		var wg sync.WaitGroup

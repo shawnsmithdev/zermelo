@@ -2,7 +2,6 @@ package zermelo
 
 import (
 	"github.com/shawnsmithdev/zermelo/v2/internal"
-	"golang.org/x/exp/constraints"
 	"slices"
 	"testing"
 )
@@ -41,7 +40,7 @@ func TestSortBYOB(t *testing.T) {
 	testSort[uint](t, internal.RandInteger[uint](), true)
 }
 
-func testSort[N constraints.Integer](t *testing.T, rng func() N, byob bool) {
+func testSort[N Integer](t *testing.T, rng func() N, byob bool) {
 	for i := 0; i <= testSize; i++ {
 		toTest := make([]N, i)
 		internal.FillSlice(toTest, rng)

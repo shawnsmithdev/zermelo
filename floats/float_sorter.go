@@ -2,17 +2,16 @@ package floats
 
 import (
 	"github.com/shawnsmithdev/zermelo/v2"
-	"golang.org/x/exp/constraints"
 	"slices"
 )
 
 // cutoffSorter is a Sorter with adjustable comparison sort cutoff, for testing.
-type cutoffSorter[F constraints.Float] interface {
+type cutoffSorter[F Float] interface {
 	zermelo.Sorter[F]
 	withCutoff(int) cutoffSorter[F]
 }
 
-type floatSorter[F constraints.Float, U constraints.Unsigned] struct {
+type floatSorter[F Float, U zermelo.Unsigned] struct {
 	uintSorter     zermelo.Sorter[U]
 	compSortCutoff int
 	topBit         U
@@ -43,11 +42,11 @@ func (s *floatSorter[F, U]) withCutoff(cutoff int) cutoffSorter[F] {
 // The first sort creates a buffer the same size as the slice being sorted and keeps it for future use.
 // Later sorts may grow this buffer as needed. The FloatSorter returned is not thread safe.
 // Using this sorter can be much faster than repeat calls to SortFloats.
-func NewFloatSorter[F constraints.Float]() zermelo.Sorter[F] {
+func NewFloatSorter[F Float]() zermelo.Sorter[F] {
 	return newFloatSorter[F]()
 }
 
-func newFloatSorter[F constraints.Float]() cutoffSorter[F] {
+func newFloatSorter[F Float]() cutoffSorter[F] {
 	if isFloat32[F]() {
 		return &floatSorter[F, uint32]{
 			uintSorter:     zermelo.NewSorter[uint32](),

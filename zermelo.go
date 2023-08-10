@@ -3,7 +3,6 @@ package zermelo // import "github.com/shawnsmithdev/zermelo/v2"
 
 import (
 	"github.com/shawnsmithdev/zermelo/v2/internal"
-	"golang.org/x/exp/constraints"
 	"slices"
 )
 
@@ -14,7 +13,7 @@ const (
 )
 
 // Sort sorts integer slices. If the slice is large enough, radix sort is used by allocating a new buffer.
-func Sort[T constraints.Integer](x []T) {
+func Sort[T Integer](x []T) {
 	if len(x) < 2 {
 		return
 	}
@@ -28,14 +27,14 @@ func Sort[T constraints.Integer](x []T) {
 
 // SortBYOB sorts integer slices with radix sort using the provided buffer.
 // len(buffer) must be greater or equal to len(x).
-func SortBYOB[T constraints.Integer](x, buffer []T) {
+func SortBYOB[T Integer](x, buffer []T) {
 	if len(x) >= 2 {
 		size, minval := internal.Detect[T]()
 		sortBYOB(x, buffer, size, minval)
 	}
 }
 
-func sortBYOB[T constraints.Integer](x, buffer []T, size uint, minval T) {
+func sortBYOB[T Integer](x, buffer []T, size uint, minval T) {
 	from := x
 	to := buffer[:len(x)]
 

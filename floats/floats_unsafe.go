@@ -2,14 +2,13 @@ package floats
 
 import (
 	"github.com/shawnsmithdev/zermelo/v2"
-	"golang.org/x/exp/constraints"
 	"unsafe"
 )
 
 // unsafeFlipSortFlip converts float slices to unsigned, flips some bits to allow sorting, sorts and unflips.
 // F and U must be the same bit size, and len(buf) must be >= len(x)
 // This will not work if NaNs are present in x. Remove them first.
-func unsafeFlipSortFlip[F constraints.Float, U constraints.Unsigned](x, b []F, size uint) {
+func unsafeFlipSortFlip[F Float, U zermelo.Unsigned](x, b []F, size uint) {
 	xu := unsafeSliceConvert[F, U](x)
 	bu := unsafeSliceConvert[F, U](b)
 	floatFlip[U](xu, U(1)<<(size-1))
@@ -17,7 +16,7 @@ func unsafeFlipSortFlip[F constraints.Float, U constraints.Unsigned](x, b []F, s
 	floatUnflip[U](xu, U(1)<<(size-1))
 }
 
-func floatFlip[U constraints.Unsigned](y []U, topBit U) {
+func floatFlip[U zermelo.Unsigned](y []U, topBit U) {
 	for idx, val := range y {
 		if val&topBit == topBit {
 			y[idx] = val ^ (^U(0))
@@ -27,7 +26,7 @@ func floatFlip[U constraints.Unsigned](y []U, topBit U) {
 	}
 }
 
-func floatUnflip[U constraints.Unsigned](y []U, topBit U) {
+func floatUnflip[U zermelo.Unsigned](y []U, topBit U) {
 	for idx, val := range y {
 		if val&topBit == topBit {
 			y[idx] = val ^ topBit

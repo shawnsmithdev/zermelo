@@ -2,7 +2,6 @@ package zermelo
 
 import (
 	"github.com/shawnsmithdev/zermelo/v2/internal"
-	"golang.org/x/exp/constraints"
 	"slices"
 	"testing"
 )
@@ -34,7 +33,7 @@ func TestSorter(t *testing.T) {
 	testSorter[uint](t, internal.RandInteger[uint](), true)
 }
 
-func testSorter[I constraints.Integer](t *testing.T, gen func() I, cutoff bool) {
+func testSorter[I Integer](t *testing.T, gen func() I, cutoff bool) {
 	var test Sorter[I]
 	if cutoff {
 		test = NewSorter[I]()
