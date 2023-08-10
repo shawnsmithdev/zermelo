@@ -3,13 +3,11 @@ package zermelo
 import (
 	"github.com/shawnsmithdev/zermelo/v2/internal"
 	"golang.org/x/exp/constraints"
-	"golang.org/x/exp/slices" // TODO: replace with stdlib when go1.21+
-	"math/rand"
 	"runtime"
+	"slices"
 	"sort"
 	"sync"
 	"testing"
-	"time"
 )
 
 // Benchmarks
@@ -22,6 +20,9 @@ const testLargeSize = 1 << 20 // ~1M * 64bit = 8 MB
 func BenchmarkSortSortInt32T(b *testing.B) {
 	testSortBencher[int32](b, testTinySize, sortSort[int32])
 }
+func BenchmarkSlicesSortInt32T(b *testing.B) {
+	testSortBencher[int32](b, testTinySize, slices.Sort[[]int32, int32])
+}
 func BenchmarkZSortInt32T(b *testing.B) {
 	testSortBencher[int32](b, testTinySize, Sort[int32])
 }
@@ -32,6 +33,9 @@ func BenchmarkZSorterInt32T(b *testing.B) {
 // tiny
 func BenchmarkSortSortUint64T(b *testing.B) {
 	testSortBencher[uint64](b, testTinySize, sortSort[uint64])
+}
+func BenchmarkSlicesSortUint64T(b *testing.B) {
+	testSortBencher[uint64](b, testTinySize, slices.Sort[[]uint64, uint64])
 }
 func BenchmarkZSortUint64T(b *testing.B) {
 	testSortBencher[uint64](b, testTinySize, Sort[uint64])
@@ -44,6 +48,9 @@ func BenchmarkZSorterUint64T(b *testing.B) {
 func BenchmarkSortSortUint64S(b *testing.B) {
 	testSortBencher[uint64](b, testSmallSize, sortSort[uint64])
 }
+func BenchmarkSlicesSortUint64S(b *testing.B) {
+	testSortBencher[uint64](b, testSmallSize, slices.Sort[[]uint64, uint64])
+}
 func BenchmarkZSortUint64S(b *testing.B) {
 	testSortBencher[uint64](b, testSmallSize, Sort[uint64])
 }
@@ -54,6 +61,9 @@ func BenchmarkZSorterUint64S(b *testing.B) {
 // medium
 func BenchmarkSortSortUint64M(b *testing.B) {
 	testSortBencher[uint64](b, testMediumSize, sortSort[uint64])
+}
+func BenchmarkSlicesSortUint64M(b *testing.B) {
+	testSortBencher[uint64](b, testMediumSize, slices.Sort[[]uint64, uint64])
 }
 func BenchmarkZSortUint64M(b *testing.B) {
 	testSortBencher[uint64](b, testMediumSize, Sort[uint64])
@@ -66,7 +76,9 @@ func BenchmarkZSorterUint64M(b *testing.B) {
 func BenchmarkSortSortUint64L(b *testing.B) {
 	testSortBencher[uint64](b, testLargeSize, sortSort[uint64])
 }
-
+func BenchmarkSlicesSortUint64L(b *testing.B) {
+	testSortBencher[uint64](b, testLargeSize, slices.Sort[[]uint64, uint64])
+}
 func BenchmarkZSortUint64L(b *testing.B) {
 	testSortBencher[uint64](b, testLargeSize, Sort[uint64])
 }
@@ -79,6 +91,10 @@ func BenchmarkSortSortSorted(b *testing.B) {
 	testBencher[uint64](b, sortSort[uint64],
 		sortedTestData[uint64](internal.RandInteger[uint64](), testSmallSize))
 }
+func BenchmarkSlicesSortSorted(b *testing.B) {
+	testBencher[uint64](b, slices.Sort[[]uint64, uint64],
+		sortedTestData[uint64](internal.RandInteger[uint64](), testSmallSize))
+}
 func BenchmarkZSortSorted(b *testing.B) {
 	testBencher[uint64](b, Sort[uint64],
 		sortedTestData[uint64](internal.RandInteger[uint64](), testSmallSize))
@@ -89,7 +105,6 @@ func BenchmarkZSorterSorted(b *testing.B) {
 }
 
 func testSortBencher[T constraints.Integer](b *testing.B, size int, sortFunc func([]T)) {
-	rand.Seed(time.Now().UnixNano()) // TODO: remove when go1.20+
 	testBencher(b, sortFunc, testDataFromRng[T](internal.RandInteger[T](), size))
 }
 

@@ -3,14 +3,11 @@ package zermelo
 import (
 	"github.com/shawnsmithdev/zermelo/v2/internal"
 	"golang.org/x/exp/constraints"
-	"golang.org/x/exp/slices"
-	"math/rand"
+	"slices"
 	"testing"
-	"time"
 )
 
 func TestSorter(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
 	testSorter[int8](t, internal.RandInteger[int8](), false)
 	testSorter[int8](t, internal.RandInteger[int8](), true)
 	testSorter[int16](t, internal.RandInteger[int16](), false)

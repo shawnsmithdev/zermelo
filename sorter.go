@@ -3,7 +3,7 @@ package zermelo
 import (
 	"github.com/shawnsmithdev/zermelo/v2/internal"
 	"golang.org/x/exp/constraints"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 // Sorter describes types that can sort slices.

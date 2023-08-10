@@ -3,12 +3,10 @@ package floats
 import (
 	"github.com/shawnsmithdev/zermelo/v2/internal"
 	"golang.org/x/exp/constraints"
-	"golang.org/x/exp/slices"
 	"math"
-	"math/rand"
+	"slices"
 	"sort"
 	"testing"
-	"time"
 )
 
 const (
@@ -16,25 +14,21 @@ const (
 )
 
 func TestSort(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
 	testSort[float32](t, randFloat32(false), false, false)
 	testSort[float64](t, randFloat64(false), false, false)
 }
 
 func TestSortNaNs(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
 	testSort[float32](t, randFloat32(true), false, true)
 	testSort[float64](t, randFloat64(true), false, true)
 }
 
 func TestSortBYOB(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
 	testSort[float32](t, randFloat32(false), true, false)
 	testSort[float32](t, randFloat32(false), true, false)
 }
 
 func TestSortNaNsBYOB(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
 	testSort[float32](t, randFloat32(true), true, true)
 	testSort[float32](t, randFloat32(true), true, true)
 }

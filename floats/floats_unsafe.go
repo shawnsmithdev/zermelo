@@ -3,7 +3,6 @@ package floats
 import (
 	"github.com/shawnsmithdev/zermelo/v2"
 	"golang.org/x/exp/constraints"
-	"reflect"
 	"unsafe"
 )
 
@@ -48,13 +47,7 @@ func floatUnflip[U constraints.Unsigned](y []U, topBit U) {
 // If x goes out of scope, the returned slice becomes invalid, as they share memory but the garbage collector is
 // unaware of the returned slice and may invalidate that memory. Working around this may require
 // use of `runtime.KeepAlive(x)`.
-//
 func unsafeSliceConvert[F any, U any](x []F) []U {
-	var result []U
-	xHeader := (*reflect.SliceHeader)(unsafe.Pointer(&x))
-	resultHeader := (*reflect.SliceHeader)(unsafe.Pointer(&result))
-	resultHeader.Data = xHeader.Data
-	resultHeader.Len = xHeader.Len
-	resultHeader.Cap = xHeader.Cap
-	return result
+	uPointer := (*U)(unsafe.Pointer(unsafe.SliceData(x)))
+	return unsafe.Slice(uPointer, cap(x))[:len(x)]
 }

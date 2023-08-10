@@ -4,7 +4,7 @@ package zermelo // import "github.com/shawnsmithdev/zermelo/v2"
 import (
 	"github.com/shawnsmithdev/zermelo/v2/internal"
 	"golang.org/x/exp/constraints"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 const (

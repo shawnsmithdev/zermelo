@@ -3,7 +3,7 @@ package floats
 import (
 	"github.com/shawnsmithdev/zermelo/v2"
 	"golang.org/x/exp/constraints"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 // cutoffSorter is a Sorter with adjustable comparison sort cutoff, for testing.

@@ -26,7 +26,7 @@ around the typical limitations of radix sort.
 You will generally only want to use zermelo if you won't mind the extra memory used for buffers and your application
 frequently sorts slices of supported types with at least 256 elements (128 for 32-bit types, 386 for `[]float64`).
 The larger the slices you are sorting, the more benefit you will gain by using zermelo instead of the standard library's
-in-place comparison sort or [`slices.Sort()`](https://pkg.go.dev/golang.org/x/exp/slices#Sort).
+in-place comparison sort [`slices.Sort()`](https://pkg.go.dev/slices#Sort).
 
 Etymology
 ---------

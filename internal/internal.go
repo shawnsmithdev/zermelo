@@ -1,8 +1,8 @@
 package internal
 
 import (
+	"crypto/rand"
 	"golang.org/x/exp/constraints"
-	"math/rand"
 )
 
 const maxSize uint = 64
@@ -39,7 +39,7 @@ func RandInteger[I constraints.Integer]() func() I {
 	buf := make([]byte, tSize/8)
 	return func() I {
 		var result I
-		rand.Read(buf)
+		_, _ = rand.Read(buf)
 		for i, val := range buf {
 			result |= I(val) << (i * 8)
 		}

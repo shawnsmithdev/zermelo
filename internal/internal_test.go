@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"golang.org/x/exp/constraints"
 	"math"
-	"math/rand"
 	"testing"
 	"time"
 )
@@ -60,7 +59,6 @@ func testFillSlice(t *testing.T, toFill string) {
 
 func TestRandInteger(t *testing.T) {
 	t.Log(time.Now()) // tests are cached and that can be confusing
-	rand.Seed(time.Now().UnixNano())
 	// just print results so it can be checked by a human
 	randIntPrint(t, RandInteger[uint]()())
 	randIntPrint(t, RandInteger[uint8]()())

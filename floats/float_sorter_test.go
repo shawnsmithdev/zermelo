@@ -4,15 +4,12 @@ import (
 	"github.com/shawnsmithdev/zermelo/v2"
 	"github.com/shawnsmithdev/zermelo/v2/internal"
 	"golang.org/x/exp/constraints"
-	"golang.org/x/exp/slices"
 	"math"
-	"math/rand"
+	"slices"
 	"testing"
-	"time"
 )
 
 func TestSorter(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
 	if !testSorter[float32](randFloat32(false), false, false) {
 		t.Fatal("failed float32")
 	}
@@ -28,7 +25,6 @@ func TestSorter(t *testing.T) {
 }
 
 func TestSorterNaNs(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
 	if !testSorter[float32](randFloat32(true), true, false) {
 		t.Fatal("failed float32 nans")
 	}
@@ -43,7 +39,6 @@ func TestSorterNaNs(t *testing.T) {
 	}
 }
 func TestSorterOnlyNaNs(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
 	if !testSorter[float32](func() float32 { return float32(math.NaN()) }, true, false) {
 		t.Fatal("failed float32 onlynans")
 	}

@@ -3,8 +3,8 @@ package floats
 import (
 	"github.com/shawnsmithdev/zermelo/v2/internal"
 	"golang.org/x/exp/constraints"
-	"golang.org/x/exp/slices"
 	"runtime"
+	"slices"
 	"sync"
 	"testing"
 )

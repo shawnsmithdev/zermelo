@@ -2,9 +2,9 @@ package floats
 
 import (
 	"golang.org/x/exp/constraints"
-	"golang.org/x/exp/slices"
 	"math"
 	"runtime"
+	"slices"
 )
 
 const (
